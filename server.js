@@ -4,22 +4,45 @@ const morgan = require('morgan')
 const app = express();
 const errorHandler = require('errorhandler');
 const pool = require('./db');
+const passport = require("passport");
+const Localstrategy = require("passport-local");
+const passportJs = require('./passport');
+const session = require('express-session');
 const PORT = 3000;
 
 app.use(morgan('dev'));
 
 //import router 
 const productRouter = require('./routes/product');
-//const userRouter = require('./routes/users')
+const usersRouter = require('./routes/users')
 
 
 //parse json
 app.use(express.json());
 
+//session
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 //1 hour
+  }
+
+}))
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('Cookie secure?', process.env.NODE_ENV === 'production');
+
+//passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 //mount all routes
 //product router
 app.use('/products', productRouter);
-//app.use('/users', userRouter);
+app.use('/users', usersRouter);
 
 
 //error handling 
@@ -43,7 +66,6 @@ app.listen(PORT, () => {
 });
 
 module.exports = { 
-  pool,
   app
 
 };

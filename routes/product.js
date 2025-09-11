@@ -97,7 +97,7 @@ productRouter.put('/:id', async (req, res,next) => {
   try {
 const id = parseInt(req.params.id, 10);
 const {name, description, category, brand, main_page_url} = req.body;
-//et category if provided
+//let category if provided
 let categoryId
 if (category) {
 categoryId = await categoryHelper(category);
@@ -129,13 +129,13 @@ return res.json(result.rows[0])
 }
 });
 
-//Delete Producers by ID
+//Delete Products by ID
 productRouter.delete('/:id', async(req, res,next)=>{
   try {
         const id = parseInt(req.params.id)
     const result = await pool.query("DELETE FROM products WHERE id = $1", [id]);
-    if(result.rows === 0) {
-      return res.status(400).json({message: "product not found"});
+    if(result.rowCount === 0) {
+      return res.status(404).json({message: "product not found"});
     }
     res.status(204).send()
   } catch (err) {

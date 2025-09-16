@@ -14,7 +14,8 @@ app.use(morgan('dev'));
 
 //import router 
 const productRouter = require('./routes/product');
-const usersRouter = require('./routes/users')
+const usersRouter = require('./routes/users');
+const cartRouter = require('./routes/cart');
 
 
 //parse json
@@ -40,10 +41,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //mount all routes
-//product router
 app.use('/products', productRouter);
 app.use('/users', usersRouter);
-
+app.use('/cart', cartRouter);
 
 //error handling 
 if (process.env.NODE_ENV === 'development') {

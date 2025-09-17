@@ -16,6 +16,7 @@ app.use(morgan('dev'));
 const productRouter = require('./routes/product');
 const usersRouter = require('./routes/users');
 const cartRouter = require('./routes/cart');
+const orderRouter = require('./routes/order');
 
 
 //parse json
@@ -44,6 +45,7 @@ app.use(passport.session());
 app.use('/products', productRouter);
 app.use('/users', usersRouter);
 app.use('/cart', cartRouter);
+app.use('/order', orderRouter)
 
 //error handling 
 if (process.env.NODE_ENV === 'development') {

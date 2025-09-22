@@ -58,12 +58,12 @@ res.status(200).json(groupedOrders);
 
 orderRouter.get('/:orderId', async (req, res, next)=>{
 try {
-    const {orderId} = req.params;
+        const orderIdInt = parseInt(req.params.orderId, 10);
 
     //get order
-    const {rows: orderRows} = await pool.query("SELECT * FROM orders WHERE id = $1", [orderId]);
+    const {rows: orderRows} = await pool.query("SELECT * FROM orders WHERE id = $1", [orderIdInt]);
 
-    if (orderRows.lengt === 0) {
+    if (orderRows.length === 0) {
         return res.status(404).json({error: "order not found"})
     }
     const order = orderRows[0];

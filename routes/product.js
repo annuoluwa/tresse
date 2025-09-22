@@ -1,6 +1,7 @@
 const express = require('express');
 const productRouter = express.Router();
 const pool =require('../db');
+const {isAdmin} = require('./users')
 
 
 //router.param for product id
@@ -65,7 +66,7 @@ productRouter.get('/:id', async (req, res, next) => {
 });
 
 //Add products
-productRouter.post('/', async(req, res,next)=>{
+productRouter.post('/', isAdmin, async(req, res,next)=>{
 try {
   const {id, name, description, category, categoryDescription, brand, main_page_url} = req.body;
 

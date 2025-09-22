@@ -180,4 +180,4 @@ res.status(200).json({error: "Account deleted successfully"});
 
 });
 
-module.exports = usersRoute;
+module.exports = usersRoute, isAdmin;

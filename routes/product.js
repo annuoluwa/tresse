@@ -1,7 +1,7 @@
 const express = require('express');
 const productRouter = express.Router();
 const pool =require('../db');
-const {isAdmin} = require('./users')
+const isAdmin = require('./users')
 
 
 //router.param for product id

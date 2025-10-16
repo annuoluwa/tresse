@@ -6,9 +6,11 @@ const passport = require('passport');
 const {passwordHash} = require('../passport')
 
 //middleware to check log in
-function isLoggedIn(req, res, next) { //making sure only logged-inuser can acces it
-    if (req.isAuthenticated()) return next();
-    res.redirect('/login');
+function isLoggedIn(req, res, next) { //making sure only logged-inuser can access it
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        return next()
+    };
+   return res.redirect('/login');
 };
 
 function isAdmin(req, res, next) {
@@ -20,17 +22,22 @@ function isAdmin(req, res, next) {
 
 //login
 /* browser redirect logic
-usersRoute.post('/login', passport.authenticate("local", {
-    failureRedirect: "/login" //if login fails, redirect to login page
-}), (req, res)=>{
+usersRoute.post('/login', passport.authenticate("local", (err, user, info) => {
+        if (err) return next(err);
+        if (!user) return res.redirect('/login');
+   req.login(user, (err) =>{
+    if(err) return next(err);
     res.json({ //using json for the sake of postman testing because it doesnt follow redirects like a browser does. 
-        message: "Login sucessful",
+        message: "Login successful",
         user: {
-            id: req.user.id,
-            email: req.user.email
+            id: user.id,
+            email: user.email
         },
     })
-    //res.redirect("/profile"); //if login succeeds,redirect to user profile
+    res.redirect("/profile"); //if login succeeds,redirect to user profile
+});
+})(req, res, next);
+    };
 });
 */
 
@@ -71,31 +78,36 @@ usersRoute.get('/logout', (req, res)=> {
 });
 
 //register
-usersRoute.post('/register', (req, res, next)=>{
-    let { username, email, password, is_admin} = req.body
-    if(!username || !email || !password){
-       return res.status(400).json({error: "Invalid input"})
-    };
-
-    is_admin= is_admin === true || is_admin === 'true';
-    users.findByEmail(email, async (err, existingUser) => {
-if(err) return next(err);
-    if(existingUser){
-       res.status(400).send('User already exists')
-    }
-    //hash paassword
-    const hashedPassword = await passwordHash(password, 10);
-    if(!hashedPassword) {
-        return next(new Error('Password hashing failed'))
-    };
-
-    //save a new user
-    users.createUser(username, email, hashedPassword, is_admin, (err, newUser) => {
-        if(err) return next(err);
-        res.status(201).json({message: "User registered", user: newUser});
-    })
-   }) 
-})
+usersRoute.post('/register', async (req, res, next)=>{
+   try {
+               let { username, email, password, is_admin} = req.body
+       if(!username || !email || !password){
+          return res.status(400).json({error: "Email and Password required"})
+       };
+   
+       is_admin= is_admin === true || is_admin === 'true';
+   
+       //check if user already exists
+      const existingUser = await users.findByEmail(email);
+       if(existingUser){
+          res.status(409).json({message:'User already exists'})
+       }
+   
+       //hash paassword
+       const hashedPassword = await passwordHash(password, 10);
+       if(!hashedPassword) {
+           return next(new Error('Password hashing failed'))
+       };
+   
+       //create a new user
+       const newUser = await users.createUser(username, email, hashedPassword, is_admin);
+           
+           res.status(201).json({message: "User registered successfully", user: newUser});
+       
+   }catch (err) {
+       next(err)
+   };
+       });
 
 //profile protected
 usersRoute.get('/profile', isLoggedIn, (req, res)=>{
@@ -171,13 +183,13 @@ usersRoute.delete('/:id', isLoggedIn, isAdmin, async (req, res, next)=>{
 const userId = req.params.id;
 const result = await pool.query("DELETE FROM users WHERE id = $1", [userId])
 if (result.rowCount === 0) {
-    return res.status(404).json({error: "Delete unsucessful"})
+    return res.status(404).json({error: "Delete unsuccessful"})
 }
-res.status(200).json({error: "Account deleted successfully"}); 
+res.status(200).json({message: "Account deleted successfully"}); 
 } catch (err) {
     next(err)
 }
 
 });
 
-module.exports = usersRoute, isAdmin;
+module.exports ={ usersRoute, isAdmin, isLoggedIn};

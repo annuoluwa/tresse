@@ -1,13 +1,13 @@
 const express = require('express');
 const productRouter = express.Router();
 const pool =require('../db');
-const isAdmin = require('./users')
+const {isAdmin} = require('./users')
 
 
 //router.param for product id
-productRouter.param,('id', async (req, res, next, id)=>{
+productRouter.param('id', async (req, res, next, id)=>{
   try {
-    const result = await pool.query("SELECT * FROM producrs WHERE id =$1", [id]);
+    const result = await pool.query("SELECT * FROM products WHERE id =$1", [id]);
     if (!result.rows[0]) {
       return res.status(404).json({error: "Product not found"});
     }
@@ -19,7 +19,7 @@ productRouter.param,('id', async (req, res, next, id)=>{
 });
 
 //Category middleware/helper function
-async function categoryHelper(categoryName, categoryDescription) {
+ async function categoryHelper(categoryName, categoryDescription) {
   let categoryResult = await pool.query("SELECT id FROM categories WHERE name = $1", [categoryName]);
     if(categoryResult.rows.length === 0) {
       //create new category
@@ -144,4 +144,7 @@ productRouter.delete('/:id', async(req, res,next)=>{
   }
 });
 
-module.exports = productRouter;
+module.exports = {
+  productRouter,
+  categoryHelper
+}

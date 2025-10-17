@@ -1,6 +1,6 @@
 const request = require('supertest');
 const pool = require('../db');
-const {categoryHelper} = require('../routes/product')
+const {categoryHelper, getAllProducts, getProductsById, addProduct, updateProduct, deleteProduct} = require('../routes/product')
 //product param unit test
 describe('parameter middleware', () =>  {
     let req, res, next, middleware;
@@ -79,7 +79,7 @@ describe('parameter middleware', () =>  {
  //CRUD unit testing
 
 describe('GET/all products', () => {
-    let req, res, next, allProducts;
+    let req, res, next;
     beforeEach(()=>{
         req = {};
         res = {status: jest.fn().mockReturnThis(), json: jest.fn()}
@@ -90,15 +90,7 @@ describe('GET/all products', () => {
         res.json.mockClear();
         next.mockClear();
 
-         allProducts = async (req, res, next) => {
-            try{
-const result = await pool.query('SELECT * FROM products ORDER BY id ASC');
-console.log(result.rows)
-res.status(200).json(result.rows);
-    }catch (err) {
-        next (err);  
-    }
-         }
+        
     })
 
     test('returns 200 and list of products on success', async()=> {
@@ -109,7 +101,7 @@ res.status(200).json(result.rows);
             ]
         });
 
-        await allProducts(req, res, next);
+        await getAllProducts(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith(
@@ -126,7 +118,7 @@ res.status(200).json(result.rows);
         const error = new Error('DB failure');
         pool.query.mockRejectedValue(error);
 
-        await allProducts(req, res, next);
+        await getAllProducts(req, res, next);
 
         expect(next).toHaveBeenCalledWith(error);
     });
@@ -135,7 +127,7 @@ res.status(200).json(result.rows);
 
 //get product by ID 
 describe('GET/product by ID', () => {
-    let req, res, next, getProductById;
+    let req, res, next;
     const mockProduct = {id: 2, productName: 'Curler'}
     beforeEach(() => {
         req = {}
@@ -147,35 +139,13 @@ describe('GET/product by ID', () => {
         res.json.mockClear();
         next.mockClear();
 
-        getProductById = async (req, res, next) => {
-            try {
-    const productId = parseInt(req.params.id, 10);
-
-    if (isNaN(productId)) {
-      return res.status(400).json({ error: "Invalid product ID" });
-    }
-
-    const results = await pool.query(
-      'SELECT * FROM products WHERE id = $1',
-      [productId]
-    );
-
-    if (results.rows.length === 0) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    res.status(200).json(results.rows[0]);
-  } catch (err) {       
-    next(err);          
-  }
-        }
     });
 
     test('returns 400 if product ID is NAN', async() => {
 
 req = {params: {id: 'ab'}}
 
-        await getProductById(req, res, next);
+        await getProductsById(req, res, next);
         
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({error:"Invalid product ID"});
@@ -185,7 +155,7 @@ req = {params: {id: 'ab'}}
     test('returns 404 if product is not found', async () => {
        req = {params: {id: 99}};
      pool.query.mockResolvedValue({rows: []});
-await getProductById(req, res, next);
+await getProductsById(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(404);
          expect(res.json).toHaveBeenCalledWith({error:"Product not found"});
@@ -197,7 +167,7 @@ await getProductById(req, res, next);
         req = {params: {id: 2}}
         pool.query.mockResolvedValue({rows: [mockProduct]});
 
-        await getProductById(req, res, next);
+        await getProductsById(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(200);
         expect(pool.query).toHaveBeenCalledWith(
@@ -211,7 +181,7 @@ await getProductById(req, res, next);
         const error = new Error('DB failure');
         pool.query.mockRejectedValue(error);
 
-        await getProductById(req, res, next);
+        await getProductsById(req, res, next);
 
         expect(next).toHaveBeenCalledWith(error);
      });
@@ -221,7 +191,7 @@ await getProductById(req, res, next);
 //ADD products
 
 describe('POST/add a new product to DB', () => {
-    let req, res, next, addProduct;
+    let req, res, next;
     let mockProduct =  {name: 'Emily in Paris',
             description: 'Conditioner',
             category: 'nil',
@@ -236,33 +206,6 @@ describe('POST/add a new product to DB', () => {
 
         pool.query.mockClear();
         res.status.mockClear();
-
-        addProduct = async( req, res, next) => {
-            try {
-  const {id, name, description, category, categoryDescription, brand, main_page_url} = req.body;
-
-  //validation
-  if (!name || !description || !category || !brand ) {
-    return res.status(400).json({error: "name, description, category, brand are required."});
-  }
-
-    //checking if category exists
-    const categoryId = await categoryHelper(category)
-
-  //insert into Database
-  const result = await pool.query(
-    `INSERT INTO products (name, description, category_id, brand, main_page_url) 
-    VALUES ($1, $2, $3, $4, $5)
-     RETURNING *`,
-    [name, description, categoryId, brand, main_page_url]
-  )
-  res.status(201).json(result.rows[0]);
-  
-} catch (error) {
-  next(error)
-}
-
-        }
 
     });
 
@@ -296,7 +239,7 @@ pool.query.mockResolvedValue({rows: [mockProduct]})
 
 
 describe('PUT/update product info by ID', () => {
-let req, res, next, updateProduct;
+let req, res, next;
 
 const mockField = {name: 'BB', description: 'ABV', category: 'CDE', brand: 'EFG', main_page_url: 'NL'}
 beforeEach(() => {
@@ -309,46 +252,6 @@ beforeEach(() => {
 
     pool.query.mockClear();
     
-
-updateProduct = async(req,res, next) => {
-
-    try {
-const id = parseInt(req.params.id, 10);
-const {name, description, category, brand, main_page_url} = req.body;
-//let category if provided
-let categoryId
-if (category) {
-categoryId = await categoryHelper(category);
-}
-const fields = [];
-const values = [];
-let idx = 1;
-
-if (name) {fields.push(`name = $${idx++}`); values.push(name);}
-if (description) {fields.push(`description = $${idx++} `); values.push(description);};
-//if (categoryId) {fields.push(`categoryId = $${idx++}`)};
-if (brand) {fields.push(`brand = $${idx++}`); values.push(brand); };
-if (main_page_url) {fields.push(`main_page_url = $${idx++}`); values.push(main_page_url);};
-
-if (fields.length === 0) {
-  return res.status(404).json({error: "No fields provided to update"})
-};
-values.push(id);
-const query = `UPDATE products SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
-
-const result = await pool.query(query, values);
-
-if (result.rows.length === 0) {
-  return res.status(404).json({error: "Product not found"})
-} 
-return res.json(result.rows[0])
-} catch (err) {
-  next(err)
-}
-    
-}
-
-
 });
 
 test('return 404 if empty field', async () => {
@@ -398,7 +301,7 @@ test('return 404 if ID  does not exist in DB', async() => {
 //DELETE products
 
 describe('DELETE/products from DB using ID', () => {
-    let req, res, next, deleteProduct;
+    let req, res, next;
 
     const mockProduct = {id: 1}
 
@@ -409,20 +312,7 @@ describe('DELETE/products from DB using ID', () => {
 
         pool.query.mockClear();
 
-        deleteProduct = async(req, res, next) => {
-            try {
-        const id = parseInt(req.params.id)
-    const result = await pool.query("DELETE FROM products WHERE id = $1", [id]);
-    if(result.rowCount === 0) {
-      return res.status(404).json({message: "product not found"});
-    }
-    res.status(204).send()
-  } catch (err) {
-    next(err)
-  }
-        }
-
-    });
+        });
 
     test('returns 404 if delete unsuccessful', async () => {
         req = {params: {id: 12}};

@@ -1,7 +1,7 @@
 const express = require('express');
 const usersRoute = express.Router();
 const pool = require('../db');
-const{ users } = require('../helperFunctions/helper')
+const{ Users } = require('../helperFunctions/helper')
 const passport = require('passport');
 const {passwordHash} = require('../passport')
 
@@ -21,29 +21,36 @@ function isAdmin(req, res, next) {
 }
 
 //login
-/* browser redirect logic
-usersRoute.post('/login', passport.authenticate("local", (err, user, info) => {
-        if (err) return next(err);
-        if (!user) return res.redirect('/login');
-   req.login(user, (err) =>{
-    if(err) return next(err);
-    res.json({ //using json for the sake of postman testing because it doesnt follow redirects like a browser does. 
-        message: "Login successful",
-        user: {
-            id: user.id,
-            email: user.email
-        },
-    })
-    res.redirect("/profile"); //if login succeeds,redirect to user profile
-});
-})(req, res, next);
-    };
-});
-*/
+//browser redirect logic
+async function userBrowserLogin(req, res, next) {
+  try {
+    const user = await new Promise((resolve, reject) => {
+      passport.authenticate('local', (err, user, info) => {
+        if (err) return reject(err);             // internal error
+        if (!user) return reject(new Error('Invalid email or password')); // invalid login
+        resolve(user);                           // successful login
+      })(req, res, next);
+    });
+
+    await new Promise((resolve, reject) => {
+      req.login(user, (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+
+res.redirect('/profile');
+
+  } catch (err) {
+    res.status(401).json({ message: err.message });
+  }
+};
+
+
 
 // login - postman testing logic with json and no redirect
-usersRoute.post('/login', (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+/*async function userLogin(req, res, next) {
+   await passport.authenticate("local", (err, user, info) => {
         if (err) return next(err); // handle internal errors
         if (!user) {
             // Instead of redirecting, return JSON for Postman
@@ -63,22 +70,22 @@ usersRoute.post('/login', (req, res, next) => {
         });
     })(req, res, next);
     
-});
+};*/
 
 
 
 
 //logout
-usersRoute.get('/logout', (req, res)=> {
+function userLogout(req, res, next) {
     req.logout(function(err){
         if(err) {return next(err); }
         res.json({message: "Logged out successfully"})
     });
-    //res.redirect('/') //browser option
-});
+    res.redirect('/') //browser option
+};
 
 //register
-usersRoute.post('/register', async (req, res, next)=>{
+async function registerNewUser(req, res, next) {
    try {
                let { username, email, password, is_admin} = req.body
        if(!username || !email || !password){
@@ -88,9 +95,9 @@ usersRoute.post('/register', async (req, res, next)=>{
        is_admin= is_admin === true || is_admin === 'true';
    
        //check if user already exists
-      const existingUser = await users.findByEmail(email);
+      const existingUser = await Users.findByEmail(email);
        if(existingUser){
-          res.status(409).json({message:'User already exists'})
+         return res.status(409).json({message:'User already exists'})
        }
    
        //hash paassword
@@ -100,14 +107,14 @@ usersRoute.post('/register', async (req, res, next)=>{
        };
    
        //create a new user
-       const newUser = await users.createUser(username, email, hashedPassword, is_admin);
+       const newUser = await Users.createUser(username, email, hashedPassword, is_admin);
            
            res.status(201).json({message: "User registered successfully", user: newUser});
        
    }catch (err) {
        next(err)
    };
-       });
+       };
 
 //profile protected
 usersRoute.get('/profile', isLoggedIn, (req, res)=>{
@@ -116,16 +123,16 @@ usersRoute.get('/profile', isLoggedIn, (req, res)=>{
 
 //CRUD operation
 
-usersRoute.get('/', isLoggedIn, isAdmin, async(req, res, next)=> {
+ async function getAllProfilesByAdmin(req, res, next) {
 try {
     const result = await pool.query("SELECT  id, username, email FROM users")
     res.status(200).json({users: result.rows})
 } catch (err) {
     next(err);
 }
-});
+};
 
-usersRoute.get('/:id', isLoggedIn, isAdmin, async (req, res, next) => {
+async function getUserById(req, res, next) {
     try {
 const userId = req.params.id
 const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId])
@@ -137,10 +144,10 @@ if (req.user.id !== parseInt(userId)  && result.rows.length === 0) {
   } catch (err) {       
     next(err);          
   }
-});
+};
 
 //update users info by ID
-usersRoute.put('/:id', async (req, res, next)=> {
+ async function updateUserRoute(req, res, next) {
     try {
     const userId = req.params.id;
     const {id, username, email, password} = req.body;
@@ -174,11 +181,10 @@ if (result.rows.length === 0) {
  res.json({message: "User updated successfully", user: result.rows[0]});
 } catch (err) {
   next(err)
-}
+};
+ };
 
-});
-
-usersRoute.delete('/:id', isLoggedIn, isAdmin, async (req, res, next)=>{
+async function deleteUserPath(req, res, next) {
     try{
 const userId = req.params.id;
 const result = await pool.query("DELETE FROM users WHERE id = $1", [userId])
@@ -190,6 +196,14 @@ res.status(200).json({message: "Account deleted successfully"});
     next(err)
 }
 
-});
+};
 
-module.exports ={ usersRoute, isAdmin, isLoggedIn};
+module.exports ={ usersRoute, isAdmin, isLoggedIn, deleteUserPath, updateUserRoute, getUserById, getAllProfilesByAdmin, registerNewUser, userLogout, userBrowserLogin};
+usersRoute.post('/login', userBrowserLogin)
+//usersRoute.post('/login', userLogin)
+usersRoute.get('/logout', userLogout)
+usersRoute.post('/register', registerNewUser)
+usersRoute.get('/', isLoggedIn, isAdmin, getAllProfilesByAdmin)
+usersRoute.get('/:id', isLoggedIn, isAdmin, getUserById)
+usersRoute.put('/:id', updateUserRoute)
+usersRoute.delete('/:id', isLoggedIn, isAdmin, deleteUserPath);

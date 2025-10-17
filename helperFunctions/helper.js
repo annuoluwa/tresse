@@ -1,6 +1,6 @@
 const pool = require('../db');
 
-module.exports.users = {
+module.exports.Users = {
     findByEmail: (email, callback) => {
         pool.query('SELECT * FROM users WHERE email=$1', [email], (err, result) => {
             if(err) return callback(err);

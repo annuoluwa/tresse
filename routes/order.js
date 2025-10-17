@@ -1,7 +1,7 @@
 const express = require('express');
 const orderRouter = express.Router();
 const pool = require('../db');
-orderRouter.get('/:userId', async (req, res, next) => {
+async function getOrdersByUser(req, res, next) {
   try {
     const userIdInt = parseInt(req.params.userId, 10);
     console.log('Fetching orders for userId:', userIdInt);
@@ -53,10 +53,10 @@ res.status(200).json(groupedOrders);
   } catch (err) {
     next(err);
   }
-});
+};
 
 
-orderRouter.get('/:orderId', async (req, res, next)=>{
+ async function getOrderByOrderId(req, res, next) {
 try {
         const orderIdInt = parseInt(req.params.orderId, 10);
 
@@ -67,7 +67,7 @@ try {
         return res.status(404).json({error: "order not found"})
     }
     const order = orderRows[0];
-    //get all iten=ms in the order
+    //get all items in the order
 
 const { rows: orderItems } = await pool.query(
     "SELECT oi.*, v.price, v.stock_quantity, p.name AS product_name " +
@@ -75,13 +75,17 @@ const { rows: orderItems } = await pool.query(
     "JOIN variants v ON oi.variant_id = v.id " +   
     "JOIN products p ON oi.product_id = p.id " +  
     "WHERE oi.order_id = $1",
-    [orderId]
+    [orderIdInt]
 );
 
     res.status(200).json({order, items: orderItems})
 } catch(err){
     next(err)
 }
-});;
+};
 
-module.exports = orderRouter;
+
+module.exports = {orderRouter, getOrdersByUser, getOrderByOrderId};
+
+orderRouter.get('/:userId', getOrdersByUser)
+orderRouter.get('/:orderId', getOrderByOrderId)

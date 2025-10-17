@@ -3,7 +3,7 @@ const cartRouter =  express.Router();
 const pool = require('../db');
 
 
-cartRouter.post('/', async (req, res, next) => {
+ async function addToCart(req, res, next) {
     const {userId, productId } = req.body;
     try{
         //check if product is in cart
@@ -25,7 +25,7 @@ cartRouter.post('/', async (req, res, next) => {
 } catch (err) {
         next(err)
     }
-});
+};
 
 cartRouter.get('/:userId', async(req, res, next) => {
     try{
@@ -98,4 +98,10 @@ cartRouter.post('/:userId/checkout', async(req, res, next)=>{
         }
     });
 
-module.exports = cartRouter;
+module.exports = {
+    cartRouter, 
+    addToCart
+};
+
+
+cartRouter.post('/', addToCart);

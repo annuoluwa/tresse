@@ -31,7 +31,7 @@ productRouter.param('id', async (req, res, next, id)=>{
 }  
 
 // GET all products
-productRouter.get('/', async(req, res, next) => {
+ async function getAllProducts(req, res, next) {
     try{
 const result = await pool.query('SELECT * FROM products ORDER BY id ASC');
 console.log(result.rows)
@@ -39,10 +39,10 @@ res.status(200).json(result.rows);
     }catch (err) {
         next (err); //express handles error 
     }
-});
+};
 
 //Get product by ID
-productRouter.get('/:id', async (req, res, next) => {
+ async function getProductsById(req, res, next) {
   try {
     const productId = parseInt(req.params.id, 10);
 
@@ -63,10 +63,10 @@ productRouter.get('/:id', async (req, res, next) => {
   } catch (err) {       
     next(err);          
   }
-});
+};
 
 //Add products
-productRouter.post('/', isAdmin, async(req, res,next)=>{
+ async function addProduct(req, res,next) {
 try {
   const {id, name, description, category, categoryDescription, brand, main_page_url} = req.body;
 
@@ -90,11 +90,11 @@ try {
 } catch (error) {
   next(error)
 }
-});
+};
 
 
 //Update products by ID
-productRouter.put('/:id', async (req, res,next) => {
+ async function updateProduct(req, res,next) {
   try {
 const id = parseInt(req.params.id, 10);
 const {name, description, category, brand, main_page_url} = req.body;
@@ -128,10 +128,10 @@ return res.json(result.rows[0])
 } catch (err) {
   next(err)
 }
-});
+};
 
 //Delete Products by ID
-productRouter.delete('/:id', async(req, res,next)=>{
+ async function deleteProduct(req, res,next) {
   try {
         const id = parseInt(req.params.id)
     const result = await pool.query("DELETE FROM products WHERE id = $1", [id]);
@@ -142,9 +142,21 @@ productRouter.delete('/:id', async(req, res,next)=>{
   } catch (err) {
     next(err)
   }
-});
+};
 
 module.exports = {
   productRouter,
-  categoryHelper
+  categoryHelper,
+  getAllProducts,
+  getProductsById,
+  addProduct,
+  updateProduct,
+  deleteProduct
 }
+
+
+productRouter.get('/', getAllProducts);
+productRouter.get('/:id', getProductsById);
+productRouter.post('/', isAdmin, addProduct);
+productRouter.put('/:id', updateProduct);
+productRouter.delete('/:id', deleteProduct)

@@ -1,19 +1,19 @@
 const request= require('supertest');
-const {isLoggedIn, isAdmin} = require('../routes/users');
 const passport = require('passport');
-const User = require('../models/User');
-const{ users } = require('../helperFunctions/helper');
+const{ Users } = require('../helperFunctions/helper');
 const {passwordHash} = require('../passport')
 passwordHash.mockResolvedValue('hashed_pw')//simulate hashing
 const pool =require('../db');
+const {deleteUserPath, updateUserRoute, isLoggedIn, isAdmin, getUserById, getAllProfilesByAdmin, registerNewUser, userLogout, userBrowserLogin} = require('../routes/users')
 
 jest.mock('../db', ()=>({
 query:jest.fn()
 }));
 
-jest.mock('../models/User', ()=> ({
-      findByEmail: jest.fn(),
+jest.mock('../helperFunctions/helper', ()=> ({
+      Users: {findByEmail: jest.fn(),
   createUser: jest.fn()
+      }
 }));//mocking a database;
 
 jest.mock('../passport')//mocking password hash
@@ -71,8 +71,9 @@ describe('isAdmin Middleware', () => {
 //API endpoint unit test
 
 jest.mock('passport');
-describe('POST/login', ()=>{
-let req, res, next, loginHandler;
+
+/*describe('POST/login', ()=>{
+let req, res, next;
 beforeEach(() => {
     res= {
         status: jest.fn().mockReturnThis(),
@@ -80,51 +81,29 @@ beforeEach(() => {
     };
     next = jest.fn();
     req = {login: jest.fn() };
-
-    loginHandler = (req, res, next) => {
-         passport.authenticate("local", (err, user, info) => {
-                if (err) return next(err); // handle internal errors
-                if (!user) {
-                    // Instead of redirecting, return JSON for Postman
-                    return res.status(401).json({ message: "Invalid email or password" });
-                }
-        
-                req.login(user, (err) => {
-                    if (err) return next(err);
-                    res.json({
-                        message: "Login successful",
-                        user: {
-                            id: user.id,
-                            email: user.email
-                        }
-                        
-                    });
-                });
-            })(req, res, next);
            
-    }
 })
-    test('calls next(err) when there is internal error', () => {
+    test('calls next(err) when there is internal error', async() => {
       passport.authenticate.mockImplementation((strategy, cb) => () => cb(new Error('internal error')));
-      loginHandler(req, res, next);
+      await userLogin(req, res, next);
 
         expect(next).toHaveBeenCalledWith(expect.any(Error));
     });
 
-    test('returns 401 when user is not authenticated', ()=> {
+    test('returns 401 when user is not authenticated', async()=> {
  passport.authenticate.mockImplementation((strategy, cb) => () => cb(null, false));
-      loginHandler(req, res, next);
+      await userLogin(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(res.json).toHaveBeenCalledWith({message: "Invalid email or password"});
         expect(next).not.toHaveBeenCalled();
     });
 
-    test('return JSON when login is successful', () => {
+    test('return JSON when login is successful', async() => {
           const user = { id: 1, email: 'test@example.com'};
         passport.authenticate.mockImplementation((strategy, cb) => () => cb(null, user));
       req.login.mockImplementation((user, cb) => cb(null));//simulate successfl login
-        loginHandler(req, res, next);
+       await userLogin(req, res, next);
 
         expect(req.login).toHaveBeenCalledWith(user, expect.any(Function));
         expect(res.json).toHaveBeenCalledWith({
@@ -134,11 +113,11 @@ beforeEach(() => {
         });
     });
 
-});
+});*/
 
 //unit test for browser redirect
 describe('POST/login logic for browser redirect', () =>{
-    let req, res, next, loginHandler;
+    let req, res, next;
 beforeEach(() => {
     res= {
         status: jest.fn().mockReturnThis(),
@@ -148,39 +127,19 @@ beforeEach(() => {
     next = jest.fn();
     req = {login: jest.fn() };
 
-    
-    loginHandler = (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
-        if (err) return next(err);
-        if (!user) return res.redirect('/login');
-   req.login(user, (err) =>{
-    if(err) return next(err);
-    res.json({ //using json for the sake of postman testing because it doesnt follow redirects like a browser does. 
-        message: "Login successful",
-        user: {
-            id: user.id,
-            email: user.email
-        },
-    })
-    res.redirect("/profile"); //if login succeeds,redirect to user profile
-});
-})(req, res, next);
-    };
 });
 
 
-test('redirect to profile when login is successfull', () => {
+test('redirect to profile when login is successfull', async() => {
           const user = { id: 1, email: 'test@example.com'};
-        passport.authenticate.mockImplementation((strategy, cb) => () => cb(null, user));
+passport.authenticate.mockImplementation((strategy, cb) => (req, res, next) => {
+  cb(null, user); // simulate successful authentication
+});
+
       req.login.mockImplementation((user, cb) => cb(null));//simulate successfl login
-        loginHandler(req, res, next);
+        await userBrowserLogin(req, res, next);
 
         expect(req.login).toHaveBeenCalledWith(user, expect.any(Function));
-        expect(res.json).toHaveBeenCalledWith({
-            message: 'Login successful',
-            user:{id: 1, email: 'test@example.com'}
-
-        });
         expect(res.redirect).toHaveBeenCalledWith('/profile')
 
     });
@@ -190,27 +149,18 @@ test('redirect to profile when login is successfull', () => {
 //logout unit test
 
 describe('GET/logout', () => {
-    let req, res, next, logoutHandler
+    let req, res, next;
 
     beforeEach(() => {
         req = {logout: jest.fn() };
         res = {json: jest.fn(), redirect: jest.fn() };
         next = jest.fn();
 
-        //logout handler
-        logoutHandler = (req, res, next) => {
-            req.logout(function(err){
-        if(err) {return next(err); }
-        res.json({message: "Logged out successfully"})
-    });
-    res.redirect('/') //browser option
-
-        }
-    });
+       });
 
     test('returns successful logout message and redirects to homepage', () => {
         req.logout.mockImplementation((cb) => cb(null)); //simulate logout
-        logoutHandler(req, res, next);
+        userLogout(req, res, next);
 
         expect(req.logout).toHaveBeenCalledWith(expect.any(Function));
         expect(res.json).toHaveBeenCalledWith({message: "Logged out successfully"});
@@ -221,7 +171,7 @@ describe('GET/logout', () => {
     test('calls next(err) if logout throws error', () => {
         const error = new Error('Logout failed');
         req.logout.mockImplementation((cb) => cb(error));
-        logoutHandler(req, res, next);
+        userLogout(req, res, next);
 
         expect(next).toHaveBeenCalledWith(error);
         expect(res.json).not.toHaveBeenCalled();
@@ -232,7 +182,7 @@ describe('GET/logout', () => {
 
 
 describe('POST/register', () => {
-let req, res, next, registerHandler;
+let req, res, next;
 
 beforeEach(() => {
     req ={ body: {username: 'Liz', email: 'new@example.com', password: '123' } };
@@ -242,46 +192,16 @@ beforeEach(() => {
           };
     next= jest.fn();
 
-    User.findByEmail.mockReset();
-    User.createUser.mockReset();
+    Users.findByEmail.mockReset();
+    Users.createUser.mockReset();
     passwordHash.mockReset();
   
 
-    registerHandler = async (req, res, next) => {
-        try {
-            let { username, email, password, is_admin} = req.body
-    if(!username || !email || !password){
-       return res.status(400).json({error: "Email and Password required"})
-    };
-
-    is_admin= is_admin === true || is_admin === 'true';
-
-    //check if user already exists
-   const existingUser = await User.findByEmail(email);
-    if(existingUser){
-       res.status(409).json({message:'User already exists'})
-    }
-
-    //hash paassword
-    const hashedPassword = await passwordHash(password, 10);
-    if(!hashedPassword) {
-        return next(new Error('Password hashing failed'))
-    };
-
-    //create a new user
-    const newUser = await User.createUser(username, email, hashedPassword, is_admin);
-        
-        res.status(201).json({message: "User registered successfully", user: newUser});
-    
-}catch (err) {
-    next(err)
-};
-    };
 });
 
     test('returns 400 if email/passw0rd/username/ is missing', async() =>{
 req.body = {email: ''}; // missing password
-await registerHandler(req, res, next);
+await registerNewUser(req, res, next);
 
 expect(res.status).toHaveBeenCalledWith(400);
 expect(res.json).toHaveBeenCalledWith({error: "Email and Password required"})
@@ -290,34 +210,34 @@ expect(res.json).toHaveBeenCalledWith({error: "Email and Password required"})
    
     test('returns 409 if user already exists', async() => {
 
-User.findByEmail.mockResolvedValue({id: 2, username: 'zee', email: 'test@example.com', is_admin: false});
-await registerHandler(req, res, next);
+Users.findByEmail.mockResolvedValue({id: 2, username: 'zee', email: 'test@example.com', is_admin: false});
+await registerNewUser(req, res, next);
 
-expect(User.findByEmail).toHaveBeenCalledWith('new@example.com');
+expect(Users.findByEmail).toHaveBeenCalledWith('new@example.com');
 expect(res.status).toHaveBeenCalledWith(409);
 expect(res.json).toHaveBeenCalledWith({message: 'User already exists'});
-expect(User.createUser).not.toHaveBeenCalled();
+expect(Users.createUser).not.toHaveBeenCalled();
 });
 
 
-    test('return next(err) if password is not hashed', async() => {
-User.findByEmail.mockResolvedValue(null);
+    test('calls next(err) if password is not hashed', async() => {
+Users.findByEmail.mockResolvedValue(null);
  passwordHash.mockResolvedValue(null);
 
-await registerHandler(req, res, next);
+await registerNewUser(req, res, next);
 expect(next).toHaveBeenCalledWith(expect.any(Error))
-expect(User.createUser).not.toHaveBeenCalled();
+expect(Users.createUser).not.toHaveBeenCalled();
     });
 
     test('returns 201 and successful message if user is created successfully',  async () => {
-User.findByEmail.mockResolvedValue(null);
-User.createUser.mockResolvedValue({id: 2, username: 'Liz', email: 'new@example.com', is_admin: false});
+Users.findByEmail.mockResolvedValue(null);
+Users.createUser.mockResolvedValue({id: 2, username: 'Liz', email: 'new@example.com', is_admin: false});
 passwordHash.mockResolvedValue('hashed_pw')//simulate hashing
-await registerHandler(req, res, next);
+await registerNewUser(req, res, next);
 
-expect(User.findByEmail).toHaveBeenCalledWith('new@example.com');
+expect(Users.findByEmail).toHaveBeenCalledWith('new@example.com');
 expect(passwordHash).toHaveBeenCalledWith('123', 10)
-expect(User.createUser).toHaveBeenCalledWith('Liz', 'new@example.com','hashed_pw', false)
+expect(Users.createUser).toHaveBeenCalledWith('Liz', 'new@example.com','hashed_pw', false)
 expect(res.status).toHaveBeenCalledWith(201);
 expect(res.json).toHaveBeenCalledWith({
     message: 'User registered successfully',
@@ -332,26 +252,17 @@ expect(res.json).toHaveBeenCalledWith({
 
 
 
-describe('only admin getting all users profile', ()=>{
+describe('access to profile', ()=>{
     const req ={};
     const res= {status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
-    let getUsersHandler;
+    
 
     beforeEach(() => {
         pool.query.mockReset();
         res.status.mockClear();
         res.json.mockClear();
         next.mockClear();
-
-         getUsersHandler = async (req, res, next) => {
-  try {
-    const result = await pool.query("SELECT id, username, email FROM users");
-    res.status(200).json({ users: result.rows });
-  } catch (err) {
-    next(err);
-  }
-};
 
     });
 
@@ -363,7 +274,7 @@ describe('only admin getting all users profile', ()=>{
             ]
         });
 
-        await getUsersHandler(req, res, next);
+        await getAllProfilesByAdmin(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.json).toHaveBeenCalledWith({
@@ -379,7 +290,7 @@ describe('only admin getting all users profile', ()=>{
         const error = new Error('DB failure');
         pool.query.mockRejectedValue(error);
 
-        await getUsersHandler(req, res, next);
+        await getAllProfilesByAdmin(req, res, next);
 
         expect(next).toHaveBeenCalledWith(error);
     });
@@ -387,7 +298,7 @@ describe('only admin getting all users profile', ()=>{
 
 
 describe('GET/admin gets users by ID', () => {
-    let req, res, next, getUserByIdHandler;
+    let req, res, next;
     const mockUser = { id: 1, username: 'Liz', email: 'liz@example.com'};
 
 
@@ -409,28 +320,12 @@ describe('GET/admin gets users by ID', () => {
         res.status.mockClear();
         res.json.mockClear();
         next.mockClear();
-
-getUserByIdHandler = async (req, res, next) => {
-  try {
-    const userId = req.params.id;
-    const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
-
-    if (req.user.id !== parseInt(userId) && result.rows.length === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.status(200).json(result.rows[0]);
-  } catch (err) {
-    next(err);
-  }
-};
-
-     });
+});
 
      test('returns 200 and the user data if user exists', async () => {
         pool.query.mockResolvedValue({ rows: [mockUser]});
 
-        await getUserByIdHandler(req, res, next);
+        await getUserById(req, res, next);
 
         expect(pool.query).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', ['1']);
         expect(res.status).toHaveBeenCalledWith(200);
@@ -441,14 +336,14 @@ getUserByIdHandler = async (req, res, next) => {
         const error = new Error('DB failure');
         pool.query.mockRejectedValue(error);
 
-        await getUserByIdHandler(req, res, next);
+        await getUserById(req, res, next);
 
         expect(next).toHaveBeenCalledWith(error);
      })
 });
 
 describe('PUT/user update info by ID', () => {
-    let req, res, next, updateHandler;
+    let req, res, next;
 
     beforeEach(() => {
         pool.query.mockReset();
@@ -461,48 +356,12 @@ describe('PUT/user update info by ID', () => {
         };
         next = jest.fn();
 
-        updateHandler = async (req, res, next) => {
-            try {
-    const userId = req.params.id;
-    const {id, username, email, password} = req.body;
-    const fields = [];
-    const values = [];
-    let idx =1;
-
-    if(username){fields.push(`username = $${idx++}` ); values.push(username)};
-    if(email){fields.push(`email = $${idx++}` ); values.push(email)};
-    
-    //hash paassword
-    if(password){
-    const hashedPassword = await passwordHash(password, 10);
-    if(!hashedPassword) {
-        return next(new Error('Password hashing failed'))
-    };
-    fields.push(`password = $${idx++}` ); values.push(hashedPassword)
-}
-
-if(fields.length === 0 ) {
-    return res.status(404).json({error: "No field provided"});
-}
-values.push(userId);
-const query = `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
-
-const result = await pool.query(query, values);
-
-if (result.rows.length === 0) {
-  return res.status(404).json({error: "User not found"})
-} 
- res.json({message: "User updated successfully", user: result.rows[0]});
-} catch (err) {
-  next(err)
-}
-        }
-    });
+        });
 
     test('returns 404 when no fields provided', async () => {
         req.body = {};
 
-        await updateHandler(req,res, next);
+        await updateUserRoute(req,res, next);
 
         expect(res.status).toHaveBeenCalledWith(404);
         expect(res.json).toHaveBeenCalledWith({error: "No field provided"});
@@ -513,7 +372,7 @@ if (result.rows.length === 0) {
         req.body = { password: 'secret' };
         passwordHash.mockResolvedValue(null);
 
-        await updateHandler(req, res, next);
+        await updateUserRoute(req, res, next);
 
         expect(passwordHash).toHaveBeenCalledWith('secret', 10);
         expect(next).toHaveBeenCalledWith(expect.any(Error));
@@ -526,7 +385,7 @@ if (result.rows.length === 0) {
         const expectedQuery = 'UPDATE users SET username = $1 WHERE id = $2 RETURNING *';
         pool.query.mockResolvedValue({rows: []}); // no rows -> not found
 
-        await updateHandler(req, res, next);
+        await updateUserRoute(req, res, next);
 
         expect(pool.query).toHaveBeenCalledWith(expectedQuery, ['username', '42']);
         expect(res.status).toHaveBeenCalledWith(404);
@@ -540,7 +399,7 @@ if (result.rows.length === 0) {
         const updatedUser = { id: 42, username: 'alice', email: 'alice@example.com'};
         pool.query.mockResolvedValue({ rows: [updatedUser]});
 
-        await updateHandler(req, res, next);
+        await updateUserRoute(req, res, next);
 
         expect(passwordHash).toHaveBeenCalledWith('pw', 10);
         expect(pool.query).toHaveBeenCalledWith(expectedQuery, ['alice', 'alice@example.com', 'hashed_pw', '42']);
@@ -554,7 +413,7 @@ if (result.rows.length === 0) {
             const dbError = new Error('DB failed');
             pool.query.mockRejectedValue(dbError);
 
-            await updateHandler(req, res, next);
+            await updateUserRoute(req, res, next);
 
             expect(next).toHaveBeenCalledWith(dbError);
         });
@@ -562,7 +421,7 @@ if (result.rows.length === 0) {
 
 
     describe('DELETE/users info by ID', () => {
-        let req, res, next, deleteUser;
+        let req, res, next;
         beforeEach( () => {
     req ={
         params: {id: 5},
@@ -579,24 +438,13 @@ if (result.rows.length === 0) {
    pool.query.mockReset();
    pool.query.mockClear();
 
-    deleteUser = async (req, res, next) => {
-        try{
-const userId = req.params.id;
-const result = await pool.query("DELETE FROM users WHERE id = $1", [userId])
-if (result.rowCount === 0) {
-    return res.status(404).json({error: "Delete unsuccessful"})
-}
-res.status(200).json({message: "Account deleted successfully"}); 
-} catch (err) {
-    next(err)
-}
-    }
+    
 });
 
 test('returns 200 if account got deleted successfully', async () => {
 pool.query.mockResolvedValue({rows: 5});
 
-await deleteUser(req, res, next);
+await deleteUserPath(req, res, next);
 
 expect(pool.query).toHaveBeenCalledWith("DELETE FROM users WHERE id = $1", [5]);
 expect(res.status).toHaveBeenCalledWith(200);
@@ -608,7 +456,7 @@ test('returns 404 if delete is unsuccessful', async() => {
 
 pool.query.mockResolvedValue({rowCount: 0});
 
-await deleteUser(req, res, next);
+await deleteUserPath(req, res, next);
 
 expect(pool.query).toHaveBeenCalledWith("DELETE FROM users WHERE id = $1", [5])
 expect(res.status).toHaveBeenCalledWith(404);
@@ -620,7 +468,7 @@ test('calls next(err) if there is an internal failure', async () => {
         const error = new Error('DB failure');
         pool.query.mockRejectedValue(error);
 
-        await deleteUser(req, res, next);
+        await deleteUserPath(req, res, next);
 
         expect(next).toHaveBeenCalledWith(error);
      });

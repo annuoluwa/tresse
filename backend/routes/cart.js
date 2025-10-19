@@ -27,7 +27,7 @@ const pool = require('../db');
     }
 };
 
-cartRouter.get('/:userId', async(req, res, next) => {
+async function usersItemsInCartById(req, res, next) {
     try{
     const {userId} = req.params;
     const result = await pool.query("SELECT * FROM carts WHERE userId = $1", [userId])
@@ -35,10 +35,10 @@ cartRouter.get('/:userId', async(req, res, next) => {
     } catch (err){
         res.status(500).json({error: "Server error while fetching cart"})
     }
-});
+};
 
 
-cartRouter.delete('/:userId', async(req, res, next) => {
+ async function deleteCartbyUsersId(req, res, next) {
     try{
         const {userId} = req.params;
         const del = await pool.query("DELETE FROM carts WHERE userId = $1", [userId]);
@@ -50,7 +50,7 @@ cartRouter.delete('/:userId', async(req, res, next) => {
     } catch(err) {
         next(err)
     };
-});
+};
 
 //checkout endpoint
 
@@ -100,8 +100,12 @@ cartRouter.post('/:userId/checkout', async(req, res, next)=>{
 
 module.exports = {
     cartRouter, 
-    addToCart
+    addToCart,
+    usersItemsInCartById,
+    deleteCartbyUsersId
 };
 
 
 cartRouter.post('/', addToCart);
+cartRouter.get('/:userId', usersItemsInCartById);
+cartRouter.delete('/:userId', deleteCartbyUsersId);

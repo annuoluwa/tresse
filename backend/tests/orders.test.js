@@ -78,7 +78,7 @@ describe('GET/order/:orderId', () => {
         pool.query =jest.fn();
     });
 
-    test('returnn 404 if order is not found', async () => {
+    test('returns 404 if order is not found', async () => {
         req.params.orderId = '9';
         pool.query.mockResolvedValue({rows: []});
 

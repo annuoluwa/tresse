@@ -13,10 +13,10 @@ const PORT = 3000;
 app.use(morgan('dev'));
 
 //import router 
-const productRouter = require('./routes/product');
-const usersRouter = require('./routes/users');
-const cartRouter = require('./routes/cart');
-const orderRouter = require('./routes/order');
+const {productRouter} = require('./routes/product');
+const {usersRouter} = require('./routes/users');
+const {cartRouter} = require('./routes/cart');
+const {orderRouter} = require('./routes/order');
 
 
 //parse json

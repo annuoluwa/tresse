@@ -8,7 +8,9 @@ const passport = require("passport");
 const Localstrategy = require("passport-local");
 const passportJs = require('./passport');
 const session = require('express-session');
+const cors = require('cors') 
 const PORT = 3000;
+
 
 app.use(morgan('dev'));
 
@@ -18,9 +20,12 @@ const {usersRouter} = require('./routes/users');
 const {cartRouter} = require('./routes/cart');
 const {orderRouter} = require('./routes/order');
 
+app.use(cors);
 
 //parse json
 app.use(express.json());
+
+app.use(morgan('dev'));
 
 //session
 app.use(session({

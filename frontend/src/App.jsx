@@ -1,5 +1,7 @@
 import React, {useState, useEffect } from 'react';
 import NavBar from './components/NavBar/NavBar';
+import HeroBanner from './components/HeroBanner/HeroBanner';
+import Category from './components/Category/Category';
 
 
 function App() {
@@ -36,6 +38,8 @@ function App() {
         return (
             <div>
                 <NavBar cartCount={cartItems.length} user={currentUser} />
+                <HeroBanner />
+                <Category />
             </div>
         )
     };

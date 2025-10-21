@@ -92,6 +92,29 @@ try {
 }
 };
 
+//getproduct by categoryName
+async function getProductByCategory(req, res, next) {
+  try {
+    const {categoryName} =  req.params;
+    const products = await pool.query(
+    `SELECT p.*
+      FROM products p
+      JOIN categories c ON p.category_id = c.id
+      WHERE c.name = $1
+    `, [categoryName]
+    );
+
+    if (products.rows.length === 0) {
+      return res.status(404).json({message: "No products found in this category"});
+
+    }
+
+    res.status(200).json(products.rows);
+  }catch (err) {
+    console.error("Error fetching products by category:", err);
+    res.status(500).json({message: "Server error fetching category products"});
+  }
+}
 
 //Update products by ID
  async function updateProduct(req, res,next) {
@@ -149,6 +172,7 @@ module.exports = {
   categoryHelper,
   getAllProducts,
   getProductsById,
+  getProductByCategory,
   addProduct,
   updateProduct,
   deleteProduct
@@ -157,6 +181,7 @@ module.exports = {
 
 productRouter.get('/', getAllProducts);
 productRouter.get('/:id', getProductsById);
+productRouter.get('/category/:name', getProductByCategory)
 productRouter.post('/', isAdmin, addProduct);
 productRouter.put('/:id', updateProduct);
 productRouter.delete('/:id', deleteProduct)

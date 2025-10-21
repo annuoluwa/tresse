@@ -1,6 +1,6 @@
 const request = require('supertest');
 const pool = require('../db');
-const {categoryHelper, getAllProducts, getProductsById, addProduct, updateProduct, deleteProduct} = require('../routes/product')
+const {categoryHelper, getAllProducts, getProductsById, addProduct, updateProduct, deleteProduct, getProductByCategory} = require('../routes/product')
 //product param unit test
 describe('parameter middleware', () =>  {
     let req, res, next, middleware;
@@ -185,6 +185,77 @@ await getProductsById(req, res, next);
 
         expect(next).toHaveBeenCalledWith(error);
      });
+
+});
+
+
+describe('GET /products by category', () => {
+  let req, res, next;
+
+  beforeEach(() => {
+    req = { params: { categoryName: 'Hair Care' } }; 
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    next = jest.fn();
+
+    pool.query = jest.fn();
+
+    res.status.mockClear();
+    res.json.mockClear();
+    pool.query.mockClear();
+  });
+
+  test('returns 404 if no products are found', async () => {
+
+    req.params.categoryName = 'NonExistingCategory';
+
+    pool.query.mockResolvedValue({ rows: [] });
+    await getProductByCategory(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: 'No products found in this category' });
+
+    expect(pool.query).toHaveBeenCalledWith(
+      expect.any(String),
+      ['NonExistingCategory']
+    );
+  });
+
+  test('returns 200 if products are found', async () => {
+
+    req.params.categoryName = 'Hair Care';
+
+    const mockProducts = [
+      { id: 1, name: 'Shampoo', category_id: 1 },
+      { id: 2, name: 'Conditioner', category_id: 1 },
+    ];
+
+    pool.query.mockResolvedValue({ rows: mockProducts });
+
+    await getProductByCategory(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockProducts);
+    expect(pool.query).toHaveBeenCalledWith(
+      expect.any(String),
+      ['Hair Care']
+    );
+  });
+
+
+  test('returns 500 if there is a server error', async () => {
+  req.params.categoryName = 'Hair Care';
+
+  const mockError = new Error('Database failure');
+  pool.query.mockRejectedValue(mockError);
+
+  await getProductByCategory(req, res, next);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+  expect(res.json).toHaveBeenCalledWith({
+    message: 'Server error fetching category products'
+  });
+  expect(pool.query).toHaveBeenCalledWith(expect.any(String), ['Hair Care']);
+});
 
 });
 

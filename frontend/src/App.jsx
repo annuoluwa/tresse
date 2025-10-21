@@ -1,6 +1,7 @@
 import React, {useState, useEffect } from 'react';
 import NavBar from './components/NavBar/NavBar';
 
+
 function App() {
         
     const[currentUser, setCurrentUser ] = useState(null);
@@ -9,15 +10,18 @@ function App() {
     useEffect(() => {
         async function fetchData() {
             try {
+                
+        const API_URL = process.env.REACT_APP_API_URL;
                 //fetch logged-in user
-                const userResponse = await fetch('/users/$1');
+                const userId = 2;
+                const userResponse = await fetch(`${API_URL}/users/${userId}`);
                 const userData = await userResponse.json();
 
                 setCurrentUser(userData);
 
 
                 //fetch cart item for logged-in user
-                const cartResponse= await fetch(`cart/${userData.id}`);
+                const cartResponse= await fetch(`${API_URL}/cart/${userData.id}`);
                 const cartData = await cartResponse.json();
 
                 setCartItems(cartData);

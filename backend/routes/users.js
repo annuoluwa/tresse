@@ -1,5 +1,5 @@
 const express = require('express');
-const usersRoute = express.Router();
+const usersRouter = express.Router();
 const pool = require('../db');
 const{ Users } = require('../helperFunctions/helper')
 const passport = require('passport');
@@ -117,7 +117,7 @@ async function registerNewUser(req, res, next) {
        };
 
 //profile protected
-usersRoute.get('/profile', isLoggedIn, (req, res)=>{
+usersRouter.get('/profile', isLoggedIn, (req, res)=>{
     res.render("dashboard", {user: req.user})
 });
 
@@ -132,7 +132,7 @@ try {
 }
 };
 
-async function getUserById(req, res, next) {
+/*async function getUserById(req, res, next) {
     try {
 const userId = req.params.id
 const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId])
@@ -144,7 +144,24 @@ if (req.user.id !== parseInt(userId)  && result.rows.length === 0) {
   } catch (err) {       
     next(err);          
   }
+};*/
+
+async function getUserById(req, res, next) {
+    try {
+        const userId = req.params.id;
+        const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Simply return the user data without checking req.user
+        res.status(200).json(result.rows[0]);
+    } catch (err) {
+        next(err);
+    }
 };
+
 
 //update users info by ID
  async function updateUserRoute(req, res, next) {
@@ -198,12 +215,12 @@ res.status(200).json({message: "Account deleted successfully"});
 
 };
 
-module.exports ={ usersRoute, isAdmin, isLoggedIn, deleteUserPath, updateUserRoute, getUserById, getAllProfilesByAdmin, registerNewUser, userLogout, userBrowserLogin};
-usersRoute.post('/login', userBrowserLogin)
+module.exports ={ usersRouter, isAdmin, isLoggedIn, deleteUserPath, updateUserRoute, getUserById, getAllProfilesByAdmin, registerNewUser, userLogout, userBrowserLogin};
+usersRouter.post('/login', userBrowserLogin)
 //usersRoute.post('/login', userLogin)
-usersRoute.get('/logout', userLogout)
-usersRoute.post('/register', registerNewUser)
-usersRoute.get('/', isLoggedIn, isAdmin, getAllProfilesByAdmin)
-usersRoute.get('/:id', isLoggedIn, isAdmin, getUserById)
-usersRoute.put('/:id', updateUserRoute)
-usersRoute.delete('/:id', isLoggedIn, isAdmin, deleteUserPath);
+usersRouter.get('/logout', userLogout)
+usersRouter.post('/register', registerNewUser)
+usersRouter.get('/', isLoggedIn, isAdmin, getAllProfilesByAdmin)
+usersRouter.get('/:id', getUserById)
+usersRouter.put('/:id', updateUserRoute)
+usersRouter.delete('/:id', isLoggedIn, isAdmin, deleteUserPath);

@@ -3,10 +3,10 @@ const express = require('express');
 const morgan = require('morgan')
 const app = express();
 const errorHandler = require('errorhandler');
-const pool = require('./db');
+const pool = require('./backend/db');
 const passport = require("passport");
 const Localstrategy = require("passport-local");
-const passportJs = require('./passport');
+const passportJs = require('./backend/passport');
 const session = require('express-session');
 const cors = require('cors') 
 const PORT = 3000;
@@ -15,12 +15,12 @@ const PORT = 3000;
 app.use(morgan('dev'));
 
 //import router 
-const {productRouter} = require('./routes/product');
-const {usersRouter} = require('./routes/users');
-const {cartRouter} = require('./routes/cart');
-const {orderRouter} = require('./routes/order');
+const {productRouter} = require('./backend/routes/product');
+const {usersRouter} = require('./backend/routes/users');
+const {cartRouter} = require('./backend/routes/cart');
+const {orderRouter} = require('./backend/routes/order');
 
-app.use(cors);
+app.use(cors());
 
 //parse json
 app.use(express.json());
@@ -66,7 +66,7 @@ app.use((err, req, res, next)=>{
   });
 });
 
-
+app.get('/', (req, res) => res.send('Server is running!'));
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)

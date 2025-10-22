@@ -6,14 +6,17 @@ import Category from './components/Category/Category';
 
 function App() {
         
+        const API_URL = process.env.REACT_APP_API_URL;
+        
     const[currentUser, setCurrentUser ] = useState(null);
     const [cartItems, setCartItems ] = useState([]);
+    /*const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);*/
 
     useEffect(() => {
         async function fetchData() {
             try {
                 
-        const API_URL = process.env.REACT_APP_API_URL;
                 //fetch logged-in user
                 const userId = 2;
                 const userResponse = await fetch(`${API_URL}/users/${userId}`);
@@ -33,7 +36,23 @@ function App() {
 
         }
         fetchData();
-        }, [])
+        //eslint-disable-next-line react-hooks/exhaustive-deps
+        }, []);
+
+/*Shop by Category
+        useEffect(() => {
+            async function fetchCategory() {
+                try{
+                    const response = await fetch(`${API_URL}/product/category/${selectedCategory}`);
+                    const data = await response.json();
+                    setCategories(data);
+                }catch(err) {
+                    console.error('Error fetching categories', err)
+                }
+            }
+            fetchCategory();
+        }, [])*/
+
 
         return (
             <div>

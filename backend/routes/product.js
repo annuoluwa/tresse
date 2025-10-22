@@ -1,8 +1,8 @@
 const express = require('express');
 const productRouter = express.Router();
 const pool =require('../db');
-const {isAdmin} = require('./users')
-
+const {isAdmin} = require('./users');
+const {categoryHelper} = require('./category')
 
 //router.param for product id
 productRouter.param('id', async (req, res, next, id)=>{
@@ -18,17 +18,6 @@ productRouter.param('id', async (req, res, next, id)=>{
   }
 });
 
-//Category middleware/helper function
- async function categoryHelper(categoryName, categoryDescription) {
-  let categoryResult = await pool.query("SELECT id FROM categories WHERE name = $1", [categoryName]);
-    if(categoryResult.rows.length === 0) {
-      //create new category
-      const newCategory = await pool.query("INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING id", [categoryName, categoryDescription]);
-      return newCategory.rows[0].id;
-    }else {
-      return categoryResult.rows[0].id;
-    }
-}  
 
 // GET all products
  async function getAllProducts(req, res, next) {

@@ -9,7 +9,7 @@ const Localstrategy = require("passport-local");
 const passportJs = require('./backend/passport');
 const session = require('express-session');
 const cors = require('cors') 
-const PORT = 3000;
+const PORT = 9000;
 
 
 app.use(morgan('dev'));
@@ -19,6 +19,7 @@ const {productRouter} = require('./backend/routes/product');
 const {usersRouter} = require('./backend/routes/users');
 const {cartRouter} = require('./backend/routes/cart');
 const {orderRouter} = require('./backend/routes/order');
+const {categoryRouter} = require('./backend/routes/category');
 
 app.use(cors());
 
@@ -50,7 +51,8 @@ app.use(passport.session());
 app.use('/products', productRouter);
 app.use('/users', usersRouter);
 app.use('/cart', cartRouter);
-app.use('/order', orderRouter)
+app.use('/order', orderRouter);
+app.use('/category', categoryRouter)
 
 //error handling 
 if (process.env.NODE_ENV === 'development') {

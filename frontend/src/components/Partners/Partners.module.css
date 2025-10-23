@@ -1,0 +1,88 @@
+:root {
+  --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
+  --gradient-soft: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  --accent-rose: #ddb3b9; /* rose gold */
+  --accent-blush: #f8b9c4; /* blush pink */
+  --accent-silver: #c0c0c0; /* muted silver */
+}
+
+.partners {
+  background: var(--gradient-dark);
+  color: white;
+  padding: 4rem 2rem;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.partnersContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.partnersCaption h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  background: var(--gradient-soft);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.partnersCaption p {
+  font-size: 1.2rem;
+  color:  #4e6fa8;
+  margin-bottom: 2rem;
+}
+
+.partnersBtns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.partnerBtn {
+  background:  #133848;
+  border: 2px solid var(--accent-rose);
+  color: var(--accent-rose);
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.partnerBtn:hover {
+  background: var(--accent-rose);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.joinContainer {
+    margin-top: 6rem;
+    padding: 3rem 6rem;
+    border: black ;
+    border-radius: 2rem;
+    background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+    
+}
+
+.joinCaption {
+    font-size: larger;
+    line-height: 3rem;
+    color: black;
+}
+
+input {
+    padding: 1rem;
+    border-radius: 1rem;
+    width: 14rem;
+    border: none;
+}
+
+.subBtn {
+    padding: 0.7rem;
+    border-radius: 2rem;
+    border: none;
+    width: 9rem
+}

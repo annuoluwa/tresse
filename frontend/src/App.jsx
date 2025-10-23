@@ -2,7 +2,8 @@ import React, {useState, useEffect } from 'react';
 import NavBar from './components/NavBar/NavBar';
 import HeroBanner from './components/HeroBanner/HeroBanner';
 import Category from './components/Category/Category';
-
+import Partners from './components/Partners/Partners';
+import Footer from './components/Footer/Footer';
 
 function App() {
         
@@ -59,6 +60,8 @@ function App() {
                 <NavBar cartCount={cartItems.length} user={currentUser} />
                 <HeroBanner />
                 <Category />
+                <Partners />
+                <Footer />
             </div>
         )
     };

@@ -8,11 +8,16 @@ const passport = require("passport");
 const Localstrategy = require("passport-local");
 const passportJs = require('./backend/passport');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors') 
 const PORT = 9000;
 
 
 app.use(morgan('dev'));
+
+app.use(cors({
+  origin: "http://localhost:3000", 
+  credentials: true,}));
 
 //import router 
 const {productRouter} = require('./backend/routes/product');
@@ -21,7 +26,7 @@ const {cartRouter} = require('./backend/routes/cart');
 const {orderRouter} = require('./backend/routes/order');
 const {categoryRouter} = require('./backend/routes/category');
 
-app.use(cors());
+
 
 //parse json
 app.use(express.json());
@@ -30,16 +35,21 @@ app.use(morgan('dev'));
 
 //session
 app.use(session({
+  store: new pgSession({
+    pool: pool,              
+    tableName: 'session',
+    createTableIfMissing: true 
+  }),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: {secure: process.env.NODE_ENV === 'production',
+  cookie: {
+    secure: false,
     httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 //1 hour
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60 // 1 hour
   }
-
-}))
+}));
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('Cookie secure?', process.env.NODE_ENV === 'production');
 

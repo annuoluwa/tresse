@@ -1,0 +1,167 @@
+:root {
+  --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
+  --gradient-soft: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  --accent-rose: #ddb3b9; /* rose gold */
+  --accent-blush: #f8b9c4; /* blush pink */
+  --accent-silver: #c0c0c0; /* muted silver */
+}
+
+/* --- CONTAINER --- */
+.LoginContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-dark);
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  padding: 2rem;
+}
+
+/* --- WELCOME MESSAGE --- */
+.LoginMessage {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.LoginMessage h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--accent-blush);
+}
+
+.LoginMessage p {
+  font-size: 1rem;
+  color: var(--accent-silver);
+}
+
+/* --- FORM --- */
+.LoginForm {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.LoginForm form {
+  display: flex;
+  flex-direction: column;
+}
+
+.LoginForm label {
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--accent-silver);
+}
+
+.LoginForm input {
+  padding: 0.8rem;
+  border-radius: 0.5rem;
+  border: none;
+  margin-bottom: 1rem;
+  outline: none;
+  font-size: 1rem;
+}
+
+.LoginForm input:focus {
+  border: 2px solid var(--accent-blush);
+}
+
+/* --- BUTTONS --- */
+.LoginForm button[type="submit"] {
+  background: var(--gradient-soft);
+  color: #fff;
+  border: none;
+  padding: 0.9rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.LoginForm button[type="submit"]:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+button[type="button"] {
+  background: transparent;
+  color: var(--accent-blush);
+  border: 1px solid var(--accent-blush);
+  padding: 0.7rem 1.2rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+button[type="button"]:hover {
+  background: var(--accent-blush);
+  color: #021f2b;
+}
+
+/* --- FORGOT PASSWORD --- */
+.forgotPassword {
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--accent-silver);
+  cursor: pointer;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+.forgotPassword:hover {
+  color: var(--accent-blush);
+}
+
+/* --- SIGN UP LINK --- */
+.signupLink {
+  color: var(--accent-blush);
+  margin-left: 0.3rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signupLink:hover {
+  text-decoration: underline;
+}
+
+/* --- OAUTH BUTTONS --- */
+.oAuth {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.oAuth button {
+  flex: 1;
+  border: none;
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.oAuth button:hover {
+  background: var(--accent-blush);
+  color: #021f2b;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 500px) {
+  .LoginForm {
+    padding: 1.5rem;
+  }
+
+  .LoginMessage h3 {
+    font-size: 1.6rem;
+  }
+}

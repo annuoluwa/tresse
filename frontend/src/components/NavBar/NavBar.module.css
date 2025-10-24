@@ -23,7 +23,7 @@
 }
 
 /* Brand name / logo */
-.navbar button {
+.navbar button, a {
   background: none;
   border: none;
   color: var(--accent-blush);
@@ -31,9 +31,17 @@
   font-weight: 700;
   cursor: pointer;
   transition: color 0.3s ease, transform 0.3s ease;
+  text-decoration: none;
 }
 
+
+
 .navbar button:hover {
+  color: var(--accent-rose);
+  transform: scale(1.1);
+}
+
+.navbar a:hover {
   color: var(--accent-rose);
   transform: scale(1.1);
 }
@@ -44,7 +52,7 @@
   gap: 2rem;
 }
 
-.navLinks button {
+.navLinks a {
   background: none;
   border: none;
   color: white;
@@ -53,13 +61,12 @@
   cursor: pointer;
   position: relative;
   transition: color 0.3s ease;
+  text-decoration: none;
 }
 
-.navLinks button:hover {
-  color: var(--accent-blush);
-}
 
-.navLinks button::after {
+
+.navLinks a::after {
   content: '';
   position: absolute;
   bottom: -4px;
@@ -70,7 +77,7 @@
   transition: width 0.3s ease;
 }
 
-.navLinks button:hover::after {
+.navLinks a:hover::after {
   width: 100%;
 }
 
@@ -100,7 +107,7 @@
 }
 
 /* Buttons beside search */
-.actions button {
+.actions button, a {
   background: none;
   border: none;
   color: white;
@@ -108,7 +115,7 @@
   transition: all 0.3s ease;
 }
 
-.actions button:hover {
+.actions a:hover {
   color: var(--accent-blush);
 }
 
@@ -158,6 +165,6 @@
 }
 
 .search:hover {
-  background: var(--accent-rose);
+  
   color: white;
 }

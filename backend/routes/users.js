@@ -6,12 +6,12 @@ const passport = require('passport');
 const {passwordHash} = require('../passport')
 
 //middleware to check log in
-function isLoggedIn(req, res, next) { //making sure only logged-inuser can access it
-    if (req.isAuthenticated && req.isAuthenticated()) {
-        return next()
-    };
-   return res.redirect('/login');
-};
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+      return next();
+  }
+  return res.status(401).json({ message: "Not authenticated" });
+}
 
 function isAdmin(req, res, next) {
     if(req.user && req.user.is_admin === true) {
@@ -39,7 +39,8 @@ async function userBrowserLogin(req, res, next) {
       });
     });
 
-res.redirect('/profile');
+    res.status(200).json({user})
+//res.redirect('/profile');
 
   } catch (err) {
     res.status(401).json({ message: err.message });
@@ -77,12 +78,19 @@ res.redirect('/profile');
 
 //logout
 function userLogout(req, res, next) {
-    req.logout(function(err){
-        if(err) {return next(err); }
-        res.json({message: "Logged out successfully"})
+    req.logout(err => {
+        if (err) return next(err);
+
+        req.session.destroy(err => {
+            if (err) return next(err);
+
+            // clear session cookie
+            res.clearCookie('connect.sid');
+
+            res.json({ message: "Logged out successfully" });
+        });
     });
-    res.redirect('/') //browser option
-};
+}
 
 //register
 async function registerNewUser(req, res, next) {
@@ -92,7 +100,7 @@ async function registerNewUser(req, res, next) {
           return res.status(400).json({error: "Email and Password required"})
        };
    
-       is_admin= is_admin === true || is_admin === 'true';
+       const adminFlag = is_admin === true || is_admin === 'true';
    
        //check if user already exists
       const existingUser = await Users.findByEmail(email);
@@ -107,7 +115,7 @@ async function registerNewUser(req, res, next) {
        };
    
        //create a new user
-       const newUser = await Users.createUser(username, email, hashedPassword, is_admin);
+       const newUser = await Users.createUser(username, email, hashedPassword, adminFlag);
            
            res.status(201).json({message: "User registered successfully", user: newUser});
        

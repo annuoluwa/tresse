@@ -9,13 +9,13 @@
 .captionContainer {
    display: flex;
   align-items: center;
-  justify-content: space-between; /* equal spacing between paragraph and icons */
+  justify-content: space-between; 
   gap: 1rem;
 }
 .footerCaption  p{
-  flex: 2;                 /* give paragraph more space */
-  max-width: 300px;        /* limit width so text wraps into 3–4 lines */
-  line-height: 1.9;        /* compact but readable */
+  flex: 2;               
+  max-width: 300px;        
+  line-height: 1.9;        
   margin: 0;
   color: rgba(224, 224, 224, 0.85)
 }
@@ -23,9 +23,19 @@
 .footerCaption h4 {
   font-family: "Playfair Display", serif;
   font-optical-sizing: auto;
-  font-weight: 900;
+  font-weight: 600;
   font-size: 1.5rem;
   font-style: normal;
+  background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  -webkit-background-clip: text;   
+  -webkit-text-fill-color: transparent; 
+  background-clip: text;
+  color: transparent;
+  text-decoration: none;
+}
+
+.footerCaption a{
+  text-decoration: none;
 }
 
 h4, .logo {
@@ -46,25 +56,52 @@ color: yellow;
 font-size: 1.9rem;
 }
 
- .footer a{
-    display: flex;
-    flex-direction: row;
-    text-decoration: none;
-    color: rgba(224, 224, 224, 0.85);
-    padding-left: 0;
-    line-height: 1.8rem;
+
+.footerLink {
+  display: flex;
+  justify-content: space-between; 
+  gap: 2rem; 
+  color: rgba(224, 224, 224, 0.85);
 }
 
-.footer a:hover {
-    color: #FBC2EB;
+
+.footerColumn {
+  display: flex;
+  flex-direction: column;
 }
+
+.footerColumn h5 {
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.footerColumn a {
+  text-decoration: none;
+  color: rgba(224, 224, 224, 0.85);
+  line-height: 1.8rem;
+}
+
+.footerColumn a:hover {
+  color: #FBC2EB;
+}
+
+
 .footerIcon {
-    display: inline-flex;
+  display: inline-flex;
   justify-content: space-evenly; 
   flex: 1;                       
   gap: 1rem;
   font-size: 1.5rem;
   margin-top: 0.8rem;
+  text-decoration: none;
+}
+
+.footerIcon a{
+  color: rgba(224, 224, 224, 0.85)
+}
+
+.footerIcon a:hover {
+  color: #FBC2EB;
 }
 .lastFooter {
     display: flex;

@@ -1,9 +1,9 @@
 import React, {useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from './components/Home/Home';
 import NavBar from './components/NavBar/NavBar';
-import HeroBanner from './components/HeroBanner/HeroBanner';
-import Category from './components/Category/Category';
-import Partners from './components/Partners/Partners';
 import Footer from './components/Footer/Footer';
+import Login from './pages/login/LoginPage';
 
 function App() {
         
@@ -11,8 +11,6 @@ function App() {
         
     const[currentUser, setCurrentUser ] = useState(null);
     const [cartItems, setCartItems ] = useState([]);
-    /*const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);*/
 
     useEffect(() => {
         async function fetchData() {
@@ -40,29 +38,26 @@ function App() {
         //eslint-disable-next-line react-hooks/exhaustive-deps
         }, []);
 
-/*Shop by Category
-        useEffect(() => {
-            async function fetchCategory() {
-                try{
-                    const response = await fetch(`${API_URL}/product/category/${selectedCategory}`);
-                    const data = await response.json();
-                    setCategories(data);
-                }catch(err) {
-                    console.error('Error fetching categories', err)
-                }
-            }
-            fetchCategory();
-        }, [])*/
+          const handleLogout = () => {
+             setCurrentUser(null);
+             setCartItems([]);
+             localStorage.removeItem('token'); // optional if using JWT
+             console.log("User logged out");
+  };
+
 
 
         return (
+            <Router>
+             <NavBar cartCount={cartItems.length} user={currentUser} onLogout={handleLogout}/>
             <div>
-                <NavBar cartCount={cartItems.length} user={currentUser} />
-                <HeroBanner />
-                <Category />
-                <Partners />
-                <Footer />
+                <Routes>
+                <Route path="/" element={<Home />} />
+                 <Route path="/login" element={<Login onLogin={setCurrentUser} />} />
+                </Routes>
             </div>
+            <Footer />
+            </Router>
         )
     };
 

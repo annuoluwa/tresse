@@ -1,4 +1,4 @@
-const { users } = require('./helperFunctions/helper');
+const { Users } = require('./helperFunctions/helper');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local').Strategy;
@@ -14,46 +14,34 @@ const passwordHash = async (password, saltRounds)=>{
     return null;
 }
 
-passport.use(new LocalStrategy (
-    {usernameField: 'email'},
-    function(email, password, done) {
- users.findByEmail(email, async (err, user) => {; 
-    if(err) return done(err);
-    
- console.log("Email attempted:", email);
-      console.log("User found in DB:", user);
-    if(!user)  return done(null, false);
-    
-    
-    try {
-        console.log("Password entered:", password);
-console.log("Password in DB:", user.password);
+passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
+  try {
+    const user = await Users.findByEmail(email);
+    if (!user) return done(null, false, { message: 'Incorrect email' });
 
     const match = await bcrypt.compare(password, user.password);
-    console.log("Password match?", match);
-    if(!match) {
-        return done(null, false);
-    }
+    if (!match) return done(null, false, { message: 'Incorrect password' });
+
     return done(null, user);
-} catch (err) {
-return done(err)
-}
-});
-    }
-));
+  } catch (err) {
+    return done(err);
+  }
+}));
    
 
 //serialize & deserialize user
 passport.serializeUser((user, done) => {
     done(null, user.id);
 })
-passport.deserializeUser((id, done)=>{
-    users.findById(id, function(err, user){
-        if(err)return done(err);
-        if(!user) return done(null, false)
-       return  done (err, user)
-    })
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await Users.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
 });
+
 
 module.exports = {
     passport,

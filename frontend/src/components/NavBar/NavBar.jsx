@@ -1,22 +1,23 @@
 import React from 'react';
 import {FaHeart, FaUser, FaShoppingCart, FaSearch} from 'react-icons/fa'
 import styles from './NavBar.module.css';
+import { Link } from 'react-router-dom';
 
 
-function NavBar({ cartCount, user }) {
+function NavBar({ cartCount, user, onLogout }) {
 
   return (
     <nav className={styles.navbar}>
       {/* Left: Logo */}
       <div className={styles.logo}>
-        <button>Tresse</button>
+        <Link to='#'>Tresse</Link>
       </div>
 
       {/* Center: Nav links */}
       <div className={styles.navLinks}>
-        <button>Products</button>
-        <button>Brands</button>
-        <button>About</button>
+        <Link to='#'>Products</Link>
+        <Link to='#'>Brands</Link>
+        <Link to='#'>About</Link>
       </div>
 
       {/* Right: Search + Actions */}
@@ -29,21 +30,24 @@ function NavBar({ cartCount, user }) {
         <button className={styles.search}><FaSearch /></button>
 
         {user ? (
+          <>
           <span className={styles.user}>Hi, {user.name}</span>
+          <button onClick={onLogout}>Logout</button>
+          </>
         ) : (
-          <button>Login</button>
+          <Link to='/login'>Login</Link>
         )}
-
-        <button className={styles.iconButton}>
+          
+        <Link to='#' className={styles.iconButton}>
           <FaHeart />
-        </button>
-        <button className={styles.iconButton}>
+        </Link>
+        <Link to='#' className={styles.iconButton}>
           <FaUser />
-        </button>
-        <button className={styles.iconButton}>
+        </Link>
+        <Link to='#' className={styles.iconButton}>
           <FaShoppingCart />
           <span className={styles.cartCount}>{cartCount}</span>
-        </button>
+        </Link>
       </div>
     </nav>
   );

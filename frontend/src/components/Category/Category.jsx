@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import styles from "./Category.module.css"
 import {FaScissors, FaSpa, FaPumpSoap, FaSprayCan, FaCapsules} from "react-icons/fa6";
 
+
+const API_URL = process.env.REACT_APP_API_URL;
+
 function Category() {
     
-        const API_URL = process.env.REACT_APP_API_URL;
   const [categories, setCategories] = useState([]);
 
   // Map icons to category names (to display beside fetched data)

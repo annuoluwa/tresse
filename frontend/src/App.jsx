@@ -1,64 +1,81 @@
 import React, {useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from './components/Home/Home';
+import Home from './pages/home/Home';
 import NavBar from './components/NavBar/NavBar';
 import Footer from './components/Footer/Footer';
 import Login from './pages/login/LoginPage';
+import CartPage from './pages/cart/CartPage';
+
+const API_URL = process.env.REACT_APP_API_URL;
 
 function App() {
-        
-        const API_URL = process.env.REACT_APP_API_URL;
-        
-    const[currentUser, setCurrentUser ] = useState(null);
-    const [cartItems, setCartItems ] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                
-                //fetch logged-in user
-                const userId = 2;
-                const userResponse = await fetch(`${API_URL}/users/${userId}`);
-                const userData = await userResponse.json();
+  // Fetch the logged-in user and their cart on mount
+  useEffect(() => {
+    async function fetchCurrentUser() {
+      try {
+        // Backend route should return the user based on session/cookie
+        const userResponse = await fetch(`${API_URL}/users/me`, {
+          credentials: "include", // send session cookie
+        });
 
-                setCurrentUser(userData);
-
-
-                //fetch cart item for logged-in user
-                const cartResponse= await fetch(`${API_URL}/cart/${userData.id}`);
-                const cartData = await cartResponse.json();
-
-                setCartItems(cartData);
-            }catch (err) {
-                console.error('Error fetching data:', err)
-            }
-
+        if (!userResponse.ok) {
+          // no logged-in user
+          setCurrentUser(null);
+          setCartItems([]);
+          return;
         }
-        fetchData();
-        //eslint-disable-next-line react-hooks/exhaustive-deps
-        }, []);
 
-          const handleLogout = () => {
-             setCurrentUser(null);
-             setCartItems([]);
-             localStorage.removeItem('token'); // optional if using JWT
-             console.log("User logged out");
+        const userData = await userResponse.json();
+        setCurrentUser(userData);
+
+        // fetch cart items for this user
+        const cartResponse = await fetch(`${API_URL}/cart/${userData.id}`, {
+          credentials: "include",
+        });
+        const cartData = await cartResponse.json();
+        setCartItems(cartData);
+      } catch (err) {
+        console.error("Error fetching user or cart:", err);
+      }
+    }
+
+    fetchCurrentUser();
+  }, []);
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      // call backend logout route to destroy session
+      await fetch(`${API_URL}/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      // clear frontend state
+      setCurrentUser(null);
+      setCartItems([]);
+      console.log("User logged out");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
+  return (
+    <Router>
+      <NavBar cartCount={cartItems.length} user={currentUser} onLogout={handleLogout} />
+      <div>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login onLogin={setCurrentUser} />} />
+          <Route path="/cart" element={<CartPage cartItems={cartItems} setCartItems={setCartItems} userId={currentUser} />} />
+        </Routes>
+      </div>
+      <Footer />
+    </Router>
+  );
+}
 
-
-        return (
-            <Router>
-             <NavBar cartCount={cartItems.length} user={currentUser} onLogout={handleLogout}/>
-            <div>
-                <Routes>
-                <Route path="/" element={<Home />} />
-                 <Route path="/login" element={<Login onLogin={setCurrentUser} />} />
-                </Routes>
-            </div>
-            <Footer />
-            </Router>
-        )
-    };
-
-    export default App;
+export default App;

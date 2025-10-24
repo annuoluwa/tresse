@@ -10,7 +10,7 @@ function NavBar({ cartCount, user, onLogout }) {
     <nav className={styles.navbar}>
       {/* Left: Logo */}
       <div className={styles.logo}>
-        <Link to='#'>Tresse</Link>
+        <Link to='/'>Tresse</Link>
       </div>
 
       {/* Center: Nav links */}
@@ -44,7 +44,7 @@ function NavBar({ cartCount, user, onLogout }) {
         <Link to='#' className={styles.iconButton}>
           <FaUser />
         </Link>
-        <Link to='#' className={styles.iconButton}>
+        <Link to='/cart' className={styles.iconButton}>
           <FaShoppingCart />
           <span className={styles.cartCount}>{cartCount}</span>
         </Link>

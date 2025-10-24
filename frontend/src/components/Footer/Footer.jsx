@@ -13,7 +13,7 @@ function Footer() {
             <div className={styles.captionContainer}>
                 <div className={styles.footerCaption}>
                 <HiSparkles className={styles.logo}/> 
-               <Link to='#'> <h4>Tresse</h4> </Link>
+               <Link to='/'> <h4>Tresse</h4> </Link>
                 <p>Premium hair, beauty, 
                     and self-care products for the modern woman. 
                     Elegance meets quality.</p>

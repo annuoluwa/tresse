@@ -124,11 +124,15 @@ async function registerNewUser(req, res, next) {
    };
        };
 
-//profile protected
+//server side rendering
 usersRouter.get('/profile', isLoggedIn, (req, res)=>{
     res.render("dashboard", {user: req.user})
 });
 
+//React SPA
+usersRouter.get("/me", isLoggedIn, (req, res) => {
+  res.json(req.user); 
+});
 //CRUD operation
 
  async function getAllProfilesByAdmin(req, res, next) {

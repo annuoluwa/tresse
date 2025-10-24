@@ -1,0 +1,116 @@
+:root {
+  --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
+  --gradient-soft: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  --accent-rose: #ddb3b9;
+  --accent-blush: #f8b9c4;
+  --accent-silver: #c0c0c0;
+}
+
+.cartPage {
+  background: var(--gradient-dark);
+  color: white;
+  min-height: 100vh;  
+  margin: 0;
+  padding: 2rem;
+ 
+}
+
+.cartTitle {
+  text-align: center;
+  background: var(--gradient-soft);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.emptyCart {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--accent-rose);
+}
+
+.cartIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  border: 0.1rem solid black;
+  border-radius: 50%;
+  padding: 0.9rem 1.4rem 0.99rem 0.9rem;
+  background: var(--gradient-soft);
+  color: black;
+}
+
+.emptyText, .emptyTextCaption {
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+
+.emptyTextCaption{
+color:  #6f9ae6;
+padding: 0 23rem;
+font-size: 1.2rem;
+}
+
+.cartList {
+  list-style: none;
+  padding: 0;
+}
+
+.cartItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.cartItem:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.itemName {
+  font-weight: 500;
+}
+
+.itePrice {
+  margin-left: 0.5rem;
+  color: var(--accent-blush);
+}
+
+.removeBtn {
+  background: var(--accent-rose);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.removeBtn:hover {
+  transform: scale(1.05);
+  background: var(--accent-blush);
+}
+
+.continueBtn {
+  margin-top: 2rem;
+  padding: 0.8rem 1.8rem;
+  background: var(--gradient-soft);
+  border: none;
+  border-radius: 12px;
+  color: #021f2b;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease-in-out;
+}
+
+.continueBtn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 20px var(--accent-blush), 0 0 40px rgba(255, 192, 203, 0.2);
+}

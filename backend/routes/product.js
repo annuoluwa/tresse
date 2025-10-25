@@ -20,14 +20,32 @@ productRouter.param('id', async (req, res, next, id)=>{
 
 
 // GET all products
- async function getAllProducts(req, res, next) {
-    try{
-const result = await pool.query('SELECT * FROM products ORDER BY id ASC');
-console.log(result.rows)
-res.status(200).json(result.rows);
-    }catch (err) {
-        next (err); //express handles error 
-    }
+async function getAllProducts(req, res, next) {
+  try {
+    const result = await pool.query(`
+      SELECT p.id, p.name, p.description, p.brand, p.main_page_url AS "imageUrl",
+       COALESCE(
+         json_agg(
+           json_build_object(
+             'id', v.id,
+             'price', v.price,
+             'variant_type', v.variant_type,
+             'variant_value', v.variant_value,
+             'stock_quantity', v.stock_quantity
+           )
+         ) FILTER (WHERE v.id IS NOT NULL),
+         '[]'
+       ) AS variants
+FROM products p
+LEFT JOIN variants v ON p.id = v.product_id
+GROUP BY p.id
+ORDER BY p.id ASC;
+`);
+
+    res.status(200).json(result.rows);
+  } catch (err) {
+    next(err);
+  }
 };
 
 //Get product by ID

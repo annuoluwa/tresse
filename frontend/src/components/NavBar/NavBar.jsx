@@ -15,7 +15,7 @@ function NavBar({ cartCount, user, onLogout }) {
 
       {/* Center: Nav links */}
       <div className={styles.navLinks}>
-        <Link to='#'>Products</Link>
+        <Link to='/products'>Products</Link>
         <Link to='#'>Brands</Link>
         <Link to='#'>About</Link>
       </div>

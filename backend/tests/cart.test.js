@@ -116,3 +116,5 @@ test('returns 200 if cart gets deleted', async() => {
     expect(res.status).toHaveBeenCalledWith(200);
 })
 });
+
+describe('PUT/udpdateQuantity')

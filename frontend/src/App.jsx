@@ -5,6 +5,7 @@ import NavBar from './components/NavBar/NavBar';
 import Footer from './components/Footer/Footer';
 import Login from './pages/login/LoginPage';
 import CartPage from './pages/cart/CartPage';
+import ProductPage from './pages/products/ProductPage';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -22,11 +23,12 @@ function App() {
         });
 
         if (!userResponse.ok) {
-          // no logged-in user
-          setCurrentUser(null);
-          setCartItems([]);
-          return;
-        }
+        // No logged-in user: restore guest cart
+        const storedCart = localStorage.getItem("guestCart");
+        if (storedCart) setCartItems(JSON.parse(storedCart));
+        setCurrentUser(null);
+        return;
+      }
 
         const userData = await userResponse.json();
         setCurrentUser(userData);
@@ -63,6 +65,51 @@ function App() {
     }
   };
 
+//addToCart
+  const addToCart = async (product) => {
+  const variant = product.selectedVariant;
+
+  try {
+    setCartItems((prevCart) => {
+      // Check if the product with the selected variant already exists in cart
+      const existingIndex = prevCart.findIndex(
+        (item) => item.id === product.id && item.selectedVariant?.id === variant.id
+      );
+
+      let updatedCart;
+
+      if (existingIndex !== -1) {
+        // If product exists, increase quantity by 1
+        updatedCart = [...prevCart];
+        updatedCart[existingIndex].quantity += 1;
+      } else {
+        // If new product, add it with quantity 1
+        updatedCart = [...prevCart, { ...product, selectedVariant: variant, quantity: 1 }];
+      }
+
+      // Save guest cart in localStorage if no logged-in user
+      if (!currentUser?.id) {
+        localStorage.setItem("guestCart", JSON.stringify(updatedCart));
+        console.log("Added to guest cart:", product);
+      }
+
+      return updatedCart;
+    });
+
+    // For logged-in users, sync with backend
+    if (currentUser?.id) {
+      await fetch(`${API_URL}/cart/${currentUser.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ product }),
+      });
+      console.log("Added to user cart:", product);
+    }
+  } catch (err) {
+    console.error("Failed to add to cart:", err);
+  }
+};
   return (
     <Router>
       <NavBar cartCount={cartItems.length} user={currentUser} onLogout={handleLogout} />
@@ -71,6 +118,12 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login onLogin={setCurrentUser} />} />
           <Route path="/cart" element={<CartPage cartItems={cartItems} setCartItems={setCartItems} userId={currentUser} />} />
+          <Route path='/products' element={
+            <ProductPage 
+              cartItems={cartItems} 
+              setCartItems={setCartItems}
+              addToCart={addToCart} 
+              userId={currentUser?.id} />} />
         </Routes>
       </div>
       <Footer />

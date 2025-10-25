@@ -27,6 +27,20 @@ const pool = require('../db');
     }
 };
 
+ async  function updateQuantity(req, res, next)  {
+  const {userId, productId} = req.params;
+  const {quantity} = req.body;
+  try {
+    const updated = await pool.query(
+      "UPDATE carts SET quantity = $1 WHERE userId = $2 AND productId = $3 RETURNING *",
+      [quantity, userId, productId]
+    );
+    res.json(updated.rows[0]);
+  } catch(err) {
+    next(err);
+  }
+};
+
 async function usersItemsInCartById(req, res, next) {
     try{
     const {userId} = req.params;
@@ -102,10 +116,12 @@ module.exports = {
     cartRouter, 
     addToCart,
     usersItemsInCartById,
-    deleteCartbyUsersId
+    deleteCartbyUsersId,
+    updateQuantity
 };
 
 
 cartRouter.post('/', addToCart);
 cartRouter.get('/:userId', usersItemsInCartById);
 cartRouter.delete('/:userId', deleteCartbyUsersId);
+cartRouter.put('/:userId/:productId', updateQuantity);

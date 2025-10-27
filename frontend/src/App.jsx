@@ -11,6 +11,7 @@ import SuccessPage from './pages/success/SuccessPage.jsx';
 import CheckoutPageWrapper from './pages/checkout/CheckoutPage.jsx';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
+import UserProfilePage from './pages/usersProfile/UsersProfilePage.jsx';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const API_URL = process.env.REACT_APP_API_URL;
@@ -159,6 +160,7 @@ function AppInner() {
 
           <Route path="/products/:id" element={<ProductDetails />} />
           <Route path='/success' element={<SuccessPage />} />
+          <Route path='/profile' element={<UserProfilePage currentUser={currentUser} />} />
         </Routes>
       </div>
       <Footer />

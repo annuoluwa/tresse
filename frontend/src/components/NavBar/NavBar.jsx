@@ -41,7 +41,7 @@ function NavBar({ cartCount, user, onLogout }) {
         <Link to='#' className={styles.iconButton}>
           <FaHeart />
         </Link>
-        <Link to='#' className={styles.iconButton}>
+        <Link to='/profile' className={styles.iconButton}>
           <FaUser />
         </Link>
         <Link to='/cart' className={styles.iconButton}>

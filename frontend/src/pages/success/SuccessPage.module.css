@@ -1,0 +1,44 @@
+  .successPage {
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: var(--gradient-dark);
+  min-height: 100vh;
+  color: var(--accent-silver);
+}
+
+.successPage h1 {
+  margin-top: 20px;
+  font-size: 2.5rem;
+  background: var(--gradient-soft);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.successPage p {
+  margin: 15px 0 40px;
+  font-size: 1.2rem;
+  color: var(--accent-rose);
+}
+
+.homeButton {
+  background: var(--gradient-soft);
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.homeButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.icon {
+    size: 80px;
+    color: var(--accent-blush);
+}

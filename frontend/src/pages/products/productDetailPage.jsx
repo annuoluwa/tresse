@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import styles from './ProductDetailPage.module.css'
+import styles from './ProductDetailPage.module.css';
+
 function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -16,7 +17,6 @@ function ProductDetails() {
         const data = await res.json();
         setProduct(data);
 
-        // default to the first variant
         if (data.variants?.length) setSelectedVariant(data.variants[0]);
       } catch (err) {
         console.error(err);
@@ -28,16 +28,16 @@ function ProductDetails() {
     fetchProduct();
   }, [id]);
 
-  if (loading) return <p>Loading...</p>;
-  if (!product) return <p>Product not found</p>;
+  if (loading) return <p className={styles.loading}>Loading...</p>;
+  if (!product) return <p className={styles.error}>Product not found</p>;
 
   return (
-    <div>
+    <div className={styles.productDetailPage}>
       <h1>{product.name}</h1>
       <p>{product.description}</p>
 
       {product.variants?.length > 0 && (
-        <div>
+        <div className={styles.variantContainer}>
           <label>
             Choose variant:
             <select
@@ -49,6 +49,7 @@ function ProductDetails() {
                   )
                 )
               }
+              className={styles.variantSelect}
             >
               {product.variants.map((v, idx) => (
                 <option key={idx} value={v.variant_value}>
@@ -58,12 +59,11 @@ function ProductDetails() {
             </select>
           </label>
 
-          <p>Price: £{Number(selectedVariant?.price).toFixed(2)}</p>
+          <p className={styles.price}>Price: £{Number(selectedVariant?.price).toFixed(2)}</p>
         </div>
       )}
-      
     </div>
   );
 }
 
-export default ProductDetails;
+export default ProductDetails

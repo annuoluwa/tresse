@@ -7,6 +7,7 @@ import Login from './pages/login/LoginPage';
 import CartPage from './pages/cart/CartPage';
 import ProductPage from './pages/products/ProductPage';
 import ProductDetails from './pages/products/productDetailPage.jsx';
+import SuccessPage from './pages/success/SuccessPage.jsx';
 import CheckoutPageWrapper from './pages/checkout/CheckoutPage.jsx';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
@@ -157,6 +158,7 @@ function AppInner() {
           />
 
           <Route path="/products/:id" element={<ProductDetails />} />
+          <Route path='/success' element={<SuccessPage />} />
         </Routes>
       </div>
       <Footer />

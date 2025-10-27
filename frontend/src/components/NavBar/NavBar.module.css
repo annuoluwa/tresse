@@ -1,0 +1,170 @@
+:root {
+  --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
+  --gradient-soft: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  --accent-rose: #ddb3b9; /* rose gold */
+  --accent-blush: #f8b9c4; /* blush pink */
+  --accent-silver: #c0c0c0; /* muted silver */
+}
+
+/* NavBar container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--gradient-dark);
+  color: white;
+  padding: 1rem 2rem;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+/* Brand name / logo */
+.navbar button, a {
+  background: none;
+  border: none;
+  color: var(--accent-blush);
+  font-size: 1.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+  text-decoration: none;
+}
+
+
+
+.navbar button:hover {
+  color: var(--accent-rose);
+  transform: scale(1.1);
+}
+
+.navbar a:hover {
+  color: var(--accent-rose);
+  transform: scale(1.1);
+}
+
+/* Center navigation links */
+.navLinks {
+  display: flex;
+  gap: 2rem;
+}
+
+.navLinks a {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+
+
+.navLinks a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-soft);
+  transition: width 0.3s ease;
+}
+
+.navLinks a:hover::after {
+  width: 100%;
+}
+
+/* Right actions (search, icons, etc.) */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Search input */
+.searchInput {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--accent-silver);
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: white;
+  width: 180px;
+  transition: all 0.3s ease;
+  margin-right: 1rem;
+}
+
+.searchInput:focus {
+  border-color: var(--accent-blush);
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Buttons beside search */
+.actions button, a {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.actions a:hover {
+  color: var(--accent-blush);
+}
+
+/* Icons */
+.iconButton {
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.iconButton:hover {
+  transform: scale(1.1);
+  color: var(--accent-rose);
+}
+
+/* Cart count badge */
+.cartCount {
+  background: var(--gradient-soft);
+  color: #0F2027;
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 50%;
+  position: absolute;
+  top: -5px;
+  right: -8px;
+}
+
+/* Greeting text */
+.user {
+  color: var(--accent-blush);
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
+.search {
+  background: var(--accent-blush);
+  border: none;
+  padding: 0.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-inline-end: 1.3rem;
+  margin-inline-start: -2rem; 
+}
+
+.search:hover {
+  
+  color: white;
+}

@@ -1,0 +1,128 @@
+
+
+.footer {
+  background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+  padding: 5rem 2rem;
+  color: #fff;
+}
+
+.captionContainer {
+   display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  gap: 1rem;
+}
+.footerCaption  p{
+  flex: 2;               
+  max-width: 300px;        
+  line-height: 1.9;        
+  margin: 0;
+  color: rgba(224, 224, 224, 0.85)
+}
+
+.footerCaption h4 {
+  font-family: "Playfair Display", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: 1.5rem;
+  font-style: normal;
+  background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  -webkit-background-clip: text;   
+  -webkit-text-fill-color: transparent; 
+  background-clip: text;
+  color: transparent;
+  text-decoration: none;
+}
+
+.footerCaption a{
+  text-decoration: none;
+}
+
+h4, .logo {
+    display: inline-flex;
+    margin-inline-start: 0.3rem;
+    
+    
+}
+
+.logo{
+border: 2px solid #FBC2EB,;
+border-radius: 50%;
+padding: 0.9rem;
+position: relative;
+top: 1.2rem;
+background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+color: yellow;
+font-size: 1.9rem;
+}
+
+
+.footerLink {
+  display: flex;
+  justify-content: space-between; 
+  gap: 2rem; 
+  color: rgba(224, 224, 224, 0.85);
+}
+
+
+.footerColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.footerColumn h5 {
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.footerColumn a {
+  text-decoration: none;
+  color: rgba(224, 224, 224, 0.85);
+  line-height: 1.8rem;
+}
+
+.footerColumn a:hover {
+  color: #FBC2EB;
+}
+
+
+.footerIcon {
+  display: inline-flex;
+  justify-content: space-evenly; 
+  flex: 1;                       
+  gap: 1rem;
+  font-size: 1.5rem;
+  margin-top: 0.8rem;
+  text-decoration: none;
+}
+
+.footerIcon a{
+  color: rgba(224, 224, 224, 0.85)
+}
+
+.footerIcon a:hover {
+  color: #FBC2EB;
+}
+.lastFooter {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 7rem;
+    border-top: 1px solid rgba(255, 255, 2555, 0.2);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.footerLinks {
+display: flex;
+gap: 1.5rem;
+}
+
+.footerLinks a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.footerLinks a:hover {
+    color: #FBC2EB
+}

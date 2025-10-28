@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import {useNavigate} from 'react-router-dom'
 import styles from "./UsersProfilePage.module.css";
 
 const UserProfilePage = ({ currentUser }) => {
@@ -6,6 +7,7 @@ const UserProfilePage = ({ currentUser }) => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "" });
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -58,7 +60,12 @@ const UserProfilePage = ({ currentUser }) => {
   return (
     <div className={styles.profileContainer}>
       <h2 className={styles.title}>My Profile</h2>
-
+    <button
+  className={styles.orderBtn}
+  onClick={() => navigate("/orders")}
+>
+  Order history
+</button>
       <div className={styles.profileCard}>
         <div className={styles.avatar}>
           {user.name?.charAt(0).toUpperCase()}

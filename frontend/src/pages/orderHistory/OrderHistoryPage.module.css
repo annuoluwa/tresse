@@ -1,0 +1,61 @@
+:root {
+  --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
+  --gradient-soft: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  --accent-rose: #ddb3b9; /* rose gold */
+  --accent-blush: #f8b9c4; /* blush pink */
+  --accent-silver: #c0c0c0; /* muted silver */
+}
+
+.orderHistoryContainer {
+  background: var(--gradient-dark);
+  color: var(--accent-silver);
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease-in-out;
+}
+
+.orderHistoryContainer h3 {
+  text-align: center;
+  color: var(--accent-blush);
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.orderHistory {
+  background: var(--gradient-soft);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #021f2b;
+  border: 1px solid var(--accent-rose);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.orderHistory:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(219, 179, 185, 0.4);
+}
+
+.orderHistory p {
+  margin: 0.4rem 0;
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.orderHistory p span {
+  color: var(--accent-rose);
+  font-weight: 600;
+}
+
+/* Optional: loading and empty states */
+.loading,
+.empty {
+  text-align: center;
+  color: var(--accent-blush);
+  font-style: italic;
+  margin-top: 2rem;
+}

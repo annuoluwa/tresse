@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Category.module.css"
 import {FaScissors, FaSpa, FaPumpSoap, FaSprayCan, FaCapsules} from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 
 const API_URL = process.env.REACT_APP_API_URL;
@@ -8,6 +9,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 function Category() {
     
   const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
 
   // Map icons to category names (to display beside fetched data)
   const icons = {
@@ -24,6 +26,7 @@ function Category() {
         const res = await fetch(`${API_URL}/category/summary`); 
         const data = await res.json();
         setCategories(data);
+        console.log("Fetched categories:", data);
       } catch (err) {
         console.error("Error fetching categories:", err);
       }
@@ -32,8 +35,9 @@ function Category() {
     fetchCategories();
   }, []);
 
-  const handleClick = (categoryName) => {
-    alert(`You clicked on ${categoryName}`);
+  const handleClick = (name) => {
+      navigate(`/category/${encodeURIComponent(name)}`);
+    alert(`You clicked on ${name}`);
   };
 
   return (

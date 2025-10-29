@@ -8,6 +8,7 @@ const pool = require('./backend/db');
 const passport = require("passport");
 const Localstrategy = require("passport-local");
 const passportJs = require('./backend/passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors') 
@@ -59,6 +60,67 @@ console.log('Cookie secure?', process.env.NODE_ENV === 'production');
 //passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+
+//Google OAuth strategy
+passport.use(new GoogleStrategy({
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: 'http://localhost:9000/auth/google/callback'
+},
+(accessToken, refreshToken, profile, done) => {
+  return done(null, profile);
+}
+))
+
+app.get(
+  '/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// Google OAuth callback
+app.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/' }),
+  async (req, res, next) => {
+    try {
+      // Extract info from Google profile
+      const { id: googleId, displayName, emails } = req.user;
+      const email = emails[0].value;
+
+      // 1️⃣ Check if the user already exists by google_id
+      let existingUser = await pool.query(
+        "SELECT * FROM users WHERE google_id = $1",
+        [googleId]
+      );
+
+      let dbUser;
+
+      if (!existingUser.rows.length) {
+        // 2️⃣ Insert new user and get DB record
+        const insertResult = await pool.query(
+          "INSERT INTO users (username, email, google_id) VALUES ($1, $2, $3) RETURNING *",
+          [displayName, email, googleId]
+        );
+        dbUser = insertResult.rows[0];
+      } else {
+        dbUser = existingUser.rows[0];
+      }
+
+      // 3️⃣ Log in the DB user, NOT the raw Google profile
+      req.login(dbUser, (err) => {
+        if (err) return next(err);
+
+        // 4️⃣ Redirect to frontend
+        res.redirect('http://localhost:3000/');
+      });
+    } catch (err) {
+      console.error("Google OAuth callback error:", err);
+      next(err);
+    }
+  }
+);
+
 
 //mount all routes
 app.use('/products', productRouter);

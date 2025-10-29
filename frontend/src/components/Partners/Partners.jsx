@@ -9,13 +9,18 @@ function Partners() {
             <h3>Luxury Brands</h3>
             <p>We partner with the world's most prestigious beauty and hair care brands</p>
         </div>
-        <div className={styles.partnersBtns}>
+        
+        <div className={styles.partnersBtns} id='partners'>
             <button className={styles.partnerBtn}>Remington</button>
             <button className={styles.partnerBtn}>Dyson</button>
             <button className={styles.partnerBtn}>Conair</button>
-            <button className={styles.partnerBtn}>Superdrug</button>
+            <button className={styles.partnerBtn}>L'Oreal</button>
+            <button className={styles.partnerBtn}>Morroccanoil</button>
+            <button className={styles.partnerBtn}>Pantene</button>
+            <button className={styles.partnerBtn}>Olaplex</button>
             <button className={styles.partnerBtn}>EIS</button>
         </div>
+        
         </div>
 
 

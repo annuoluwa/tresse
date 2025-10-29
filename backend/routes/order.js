@@ -87,7 +87,44 @@ const { rows: orderItems } = await pool.query(
 };
 
 
-module.exports = {orderRouter, getOrdersByUser, getOrderByOrderId};
+async function completeOrder(req, res) {
+  const userId = parseInt(req.params.userId, 10);
+
+  if (isNaN(userId)) return res.status(400).json({ error: "Invalid user ID" });
+
+ try {
+    // Find the most recent pending order
+    const { rows: pendingOrders } = await pool.query(
+      `SELECT id FROM orders WHERE user_id = $1 AND status = 'pending' ORDER BY id DESC LIMIT 1`,
+      [userId]
+    );
+
+    if (pendingOrders.length === 0) {
+      return res.status(404).json({ error: "No pending order found" });
+    }
+
+    const orderId = pendingOrders[0].id;
+
+    // Mark it as paid
+    await pool.query(
+      `UPDATE orders SET status = 'paid' WHERE id = $1`,
+      [orderId]
+    );
+
+    // Clear cart
+    await pool.query(`DELETE FROM carts WHERE userid = $1`, [userId]);
+
+    console.log(`✅ Order ${orderId} marked as PAID for user ${userId}`);
+    res.json({ message: "Order completed successfully" });
+
+  } catch (error) {
+    console.error("❌ Error completing order:", error);
+    res.status(500).json({ error: "Server error while completing order" });
+  }
+}
+
+module.exports = {orderRouter, getOrdersByUser, getOrderByOrderId, completeOrder};
 
 orderRouter.get('/:userId', getOrdersByUser)
 orderRouter.get('/:orderId', getOrderByOrderId)
+orderRouter.post('/:userId/complete', completeOrder)

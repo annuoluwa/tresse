@@ -10,34 +10,37 @@ function Login({ onLogin }) {
   const [password, setPassword] = useState("");
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await fetch(`${API_URL}/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include", // important if using sessions/cookies
-      });
+  try {
+    const response = await fetch(`${API_URL}/users/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      credentials: "include", // important if using sessions/cookies
+    });
 
-      const data = await response.json();
-console.log("Response status:", response.status);
-console.log("Response data:", data);
-      if (!response.ok) {
-        alert(data.message || "Invalid credentials");
-        return;
-      }
+    const data = await response.json();
+    console.log("Response status:", response.status);
+    console.log("Response data:", data);
 
-      // ✅ Save user to App state
-      onLogin(data.user);
-
-      // ✅ Redirect to home
-      navigate("/");
-    } catch (err) {
-      console.error("Login error:", err);
-      alert("Something went wrong. Please try again.");
+    if (!response.ok) {
+      alert(data.message || "Invalid credentials");
+      return;
     }
-  };
+
+    // Save user to App state and sessionStorage
+    onLogin(data.user); // update React state
+    sessionStorage.removeItem("cartItems");
+    sessionStorage.setItem("currentUser", JSON.stringify(data.user)); // persist session
+
+    // Redirect only after session is saved
+    navigate("/");
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <div className={styles.LoginContainer}>
@@ -74,7 +77,7 @@ console.log("Response data:", data);
 
       <p>
         Don't have an account?{" "}
-        <Link to="#" className={styles.signupLink}>
+        <Link to="/signup" className={styles.signupLink}>
           Sign up
         </Link>
       </p>
@@ -82,7 +85,7 @@ console.log("Response data:", data);
       <p>Or continue with</p>
 
       <div className={styles.oAuth}>
-        <button>Google</button>
+        <button onClick={() =>window.location.href = 'http://localhost:9000/auth/google'}>Google</button>
         <button>Facebook</button>
       </div>
     </div>

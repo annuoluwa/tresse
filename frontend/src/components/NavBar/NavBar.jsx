@@ -4,7 +4,16 @@ import styles from './NavBar.module.css';
 import { Link } from 'react-router-dom';
 
 
-function NavBar({ cartCount, user, onLogout }) {
+function NavBar({ cartCount, user, logoutHandler }) {
+
+  const handleScrollToPartners = () => {
+    const partnersSection = document.getElementById("partners");
+    if (partnersSection) { 
+    const yOffset = -270; // negative means scroll up less (adjust to your navbar height)
+    const y = partnersSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }
 
   return (
     <nav className={styles.navbar}>
@@ -15,8 +24,9 @@ function NavBar({ cartCount, user, onLogout }) {
 
       {/* Center: Nav links */}
       <div className={styles.navLinks}>
+
         <Link to='/products'>Products</Link>
-        <Link to='#'>Brands</Link>
+        <Link onClick={handleScrollToPartners}>Brands</Link>
         <Link to='#'>About</Link>
       </div>
 
@@ -32,7 +42,7 @@ function NavBar({ cartCount, user, onLogout }) {
         {user ? (
           <>
           <span className={styles.user}>Hi, {user.name}</span>
-          <button onClick={onLogout}>Logout</button>
+          <button onClick={logoutHandler}>Logout</button>
           </>
         ) : (
           <Link to='/login'>Login</Link>

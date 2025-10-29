@@ -2,6 +2,7 @@ const express = require('express');
 const cartRouter = express.Router();
 const pool = require('../db');
 const Stripe = require('stripe');
+const { isLoggedIn } = require('./users');
 const stripe = Stripe(process.env.STRIPE_SK);
 
 // ----------------------- ADD TO CART -----------------------
@@ -135,7 +136,7 @@ async function checkout(req, res, next) {
     if (!cartItems.length) {
       return res.status(400).json({ error: "Your cart is empty." });
     }
-
+    //check stock
     const outOfStock = cartItems.find(
       item => Number(item.quantity) > Number(item.stock_quantity)
     );
@@ -144,28 +145,29 @@ async function checkout(req, res, next) {
         error: `Product ${outOfStock.productid} is out of stock.`,
       });
     }
-
+    //calculate total
     const cartTotal = cartItems.reduce(
       (sum, item) => sum + Number(item.price) * Number(item.quantity),
       0
     );
     const totalAmount = (cartTotal + Number(shippingCost)) * 100;
 
+      //create Stripe payment intent
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(totalAmount),
-      currency: "usd",
+      currency: "gbp",
       automatic_payment_methods: { enabled: true },
       metadata: { userId },
     });
 
   
-await pool.query(
-  `INSERT INTO orders (user_id, total_price, shipping_cost, status)
-   VALUES ($1, $2, $3, 'pending')`,
-  [userId, totalAmount / 100, shippingCost]
+    await pool.query(
+      `INSERT INTO orders (user_id, total_price, shipping_cost, status)
+      VALUES ($1, $2, $3, 'pending')`,
+      [userId, totalAmount / 100, shippingCost]
 );
-    await pool.query("DELETE FROM carts WHERE userid = $1", [userId]);
-    console.log(`Cart cleared for user ${userId}`);
+    //await pool.query("DELETE FROM carts WHERE userid = $1", [userId]);
+    //console.log(`Cart cleared for user ${userId}`);
 
     res.json({ clientSecret: paymentIntent.client_secret });
 
@@ -175,12 +177,14 @@ await pool.query(
   }
 }
 
+
+
 // ----------------------- ROUTES -----------------------
 cartRouter.post("/:userId", async (req, res, next) => {
   req.body.userId = req.params.userId;
   await addToCart(req, res, next);
 });
-cartRouter.get('/:userId', usersItemsInCartById);
+cartRouter.get('/:userId',  usersItemsInCartById);
 cartRouter.delete('/:userId', deleteCartbyUsersId);
 cartRouter.put('/:userId/:productId/:variantId', updateQuantity);
 cartRouter.post('/:userId/checkout', checkout);

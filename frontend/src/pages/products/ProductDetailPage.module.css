@@ -1,64 +1,119 @@
 .productDetailPage {
+  padding: 2rem;
   max-width: 100%;
-  height: 100vh;
-  margin: 50px auto;
-  padding: 30px 20px;
+  margin: 0 auto;
   background: var(--gradient-dark);
-  border-radius: 15px;
-  color: var(--accent-silver);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
 }
 
 .productDetailPage h1 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
+  font-size: 2rem;
+  text-align: center;
   background: var(--gradient-soft);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-align: center;
+  margin-bottom: 1rem;
 }
 
 .productDetailPage p {
-  font-size: 1.1rem;
-  margin-bottom: 20px;
-  color: var(--accent-rose);
+  font-size: 1rem;
+  color: var(--accent-blush);
   text-align: center;
+  margin-bottom: 2rem;
+}
+
+.image {
+  display: block;
+  margin: 0 auto 2rem auto;
+  max-width: 20%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.5);
 }
 
 .variantContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px;
-}
-
-.variantContainer label {
-  font-size: 1rem;
-  margin-bottom: 10px;
-  color: var(--accent-silver);
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .variantSelect {
-  padding: 8px 12px;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   border: 1px solid var(--accent-silver);
   background: rgba(255, 255, 255, 0.05);
-  color: var(--accent-silver);
-  margin-bottom: 15px;
+  color: #fff;
   cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.variantSelect:hover {
+  background: var(--gradient-soft);
+  border-color: var(--accent-rose);
 }
 
 .price {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: bold;
-  color: var(--accent-blush);
-  margin-top: 10px;
+  color: var(--accent-rose);
 }
 
 .loading,
 .error {
   text-align: center;
-  color: var(--accent-rose);
   font-size: 1.2rem;
-  margin-top: 50px;
+  color: var(--accent-silver);
+  margin-top: 2rem;
+}
+
+
+.addToCartContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.quantityInput {
+  width: 60px;
+  padding: 0.3rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--accent-silver);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+}
+
+.addToCartBtn {
+  padding: 0.5rem 1.2rem;
+  background: var(--accent-rose);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.addToCartBtn:hover {
+  background: var(--accent-blush);
+  transform: scale(1.05);
+}
+
+.cartMessage {
+  margin-top: 1rem;
+  text-align: center;
+  color: var(--accent-blush);
+  font-weight: bold;
 }

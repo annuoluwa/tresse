@@ -13,6 +13,8 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import UserProfilePage from './pages/usersProfile/UsersProfilePage.jsx';
 import OrderHistoryPage from './pages/orderHistory/OrderHistoryPage.jsx';
+import SignupPage from './pages/signup/SignupPage.jsx';
+import CategoryProductsPage from './pages/categories/CategoryPage.jsx';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const API_URL = process.env.REACT_APP_API_URL;
@@ -29,47 +31,65 @@ function App() {
 }
 
 function AppInner() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null); // don't preload from sessionStorage
   const [cartItems, setCartItems] = useState([]);
   const [shippingCost, setShippingCost] = useState(5);
+  const [loadingUser, setLoadingUser] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch logged-in user and cart on mount
   useEffect(() => {
     async function fetchCurrentUser() {
       try {
+        // Ask backend: is there a logged-in user for this session cookie?
         const userResponse = await fetch(`${API_URL}/users/me`, { credentials: "include" });
         console.log("Fetch /users/me response:", userResponse.status);
-        if (!userResponse.ok) return;
 
-        const userData = await userResponse.json();
-        setCurrentUser(userData);
+        if (userResponse.ok) {
+          // ✅ Session is valid
+          const userData = await userResponse.json();
+          setCurrentUser(userData);
+          sessionStorage.setItem("currentUser", JSON.stringify(userData));
 
-        // fetch cart items for this user
-        const cartResponse = await fetch(`${API_URL}/cart/${userData.id}`, { credentials: "include" });
-        const cartData = await cartResponse.json();
-        setCartItems(cartData);
+          // fetch user cart
+          const cartResponse = await fetch(`${API_URL}/cart/${userData.id}`, { credentials: "include" });
+          const cartData = await cartResponse.json();
+          setCartItems(cartData);
+        } else {
+          // 🚫 No valid session or expired
+          setCurrentUser(null);
+          sessionStorage.removeItem("currentUser");
+          setCartItems([]);
+        }
       } catch (err) {
         console.error("Error fetching user or cart:", err);
+        setCurrentUser(null);
+        sessionStorage.removeItem("currentUser");
+        setCartItems([]);
+      } finally {
+        setLoadingUser(false);
       }
     }
 
     fetchCurrentUser();
   }, []);
 
-  // Logout handler
+  // 🔒 Remove any stale cart data from past sessions
+  useEffect(() => {
+    sessionStorage.removeItem("cartItems");
+  }, []);
+
   const handleLogout = async () => {
     try {
-      await fetch(`${API_URL}/logout`, { method: "POST", credentials: "include" });
+      await fetch(`${API_URL}/users/logout`, { method: "POST", credentials: "include" });
       setCurrentUser(null);
       setCartItems([]);
+      sessionStorage.removeItem("currentUser");
       console.log("User logged out");
     } catch (err) {
       console.error("Logout failed:", err);
     }
   };
 
-  // Add to cart (only for logged-in users)
   const addToCart = async (product) => {
     if (!currentUser?.id) {
       alert("Please login to add items to cart.");
@@ -100,7 +120,11 @@ function AppInner() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ userId: currentUser.id, productId: product.id, variantId: product.selectedVariant.id }),
+        body: JSON.stringify({ 
+          userId: currentUser.id, 
+          productId: product.id, 
+          variantId: product.selectedVariant.id 
+        }),
       });
 
       console.log("Added to user cart:", product);
@@ -109,27 +133,39 @@ function AppInner() {
     }
   };
 
+  if (loadingUser) return <div>Loading...</div>;
+
   return (
     <>
-      <NavBar cartCount={cartItems.length} user={currentUser} onLogout={handleLogout} />
+      <NavBar cartCount={cartItems.length} user={currentUser} logoutHandler={handleLogout} />
       <div>
         <Routes>
-          <Route path="/" element={<Home  addToCart={addToCart}/>} />
-          <Route path="/login" element={<Login onLogin={setCurrentUser} />} />
-
-          {/* Cart page only for logged-in users */}
+          <Route path="/" element={<Home addToCart={addToCart} />} />
+          <Route
+            path="/login"
+            element={
+              <Login
+                onLogin={(user) => {
+                  setCurrentUser(user);
+                  sessionStorage.setItem("currentUser", JSON.stringify(user));
+                }}
+              />
+            }
+          />
           <Route
             path="/cart"
             element={
               currentUser ? (
-                <CartPage cartItems={cartItems || []} setCartItems={setCartItems} userId={currentUser.id} />
+                <CartPage
+                  cartItems={cartItems || []}
+                  setCartItems={setCartItems}
+                  userId={currentUser.id}
+                />
               ) : (
                 <Navigate to="/login" />
               )
             }
           />
-
-          {/* Product page allows adding to cart */}
           <Route
             path="/products"
             element={
@@ -141,14 +177,13 @@ function AppInner() {
               />
             }
           />
-
-          {/* Checkout only for logged-in users */}
           <Route
             path="/checkout"
             element={
               currentUser ? (
                 <CheckoutPageWrapper
                   cartItems={cartItems}
+                  setCartItems={setCartItems}
                   currentUser={currentUser}
                   shippingCost={shippingCost}
                   setShippingCost={setShippingCost}
@@ -158,16 +193,16 @@ function AppInner() {
               )
             }
           />
-
-          <Route path="/products/:id" element={<ProductDetails />} />
-          <Route path='/success' element={<SuccessPage />} />
-          <Route path='/profile' element={<UserProfilePage currentUser={currentUser} />} />
-          <Route path='/orders' element={<OrderHistoryPage currentUser={currentUser}/>} />
+          <Route path="/products/:id" element={<ProductDetails addToCart={addToCart} />} />
+          <Route path="/success" element={<SuccessPage />} />
+          <Route path="/profile" element={<UserProfilePage currentUser={currentUser} />} />
+          <Route path="/orders" element={<OrderHistoryPage currentUser={currentUser} />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/category/:name" element={<CategoryProductsPage />} />
         </Routes>
       </div>
       <Footer />
     </>
   );
 }
-
 export default App;

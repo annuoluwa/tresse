@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { FaCheckCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import styles from "./CheckoutPage.module.css";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
@@ -9,6 +10,7 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 // --------- Checkout Form ---------
 const CheckoutForm = ({
   cartItems,
+  setCartItems,
   shippingCost,
   currentUser,
   clientSecret,
@@ -16,6 +18,7 @@ const CheckoutForm = ({
   shippingInfo,
   setShippingInfo,
   setShippingCost,
+  setOrderCompleted
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -23,6 +26,8 @@ const CheckoutForm = ({
   const [totals, setTotals] = useState({ subtotal: 0, tax: 0, total: 0 });
   const [loading, setLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   // Calculate totals whenever cart or shipping changes
   useEffect(() => {
@@ -62,34 +67,51 @@ const CheckoutForm = ({
     }
   };
 
-  const handlePayment = async () => {
-    if (!stripe || !elements) return;
-    setLoading(true);
+const handlePayment = async () => {
+  if (!stripe || !elements) return;
+  setLoading(true);
+  setError("");
+  setOrderSuccess(null);
 
-    try {
-      const result = await stripe.confirmPayment({
-        elements,
-        confirmParams: { return_url: window.location.origin + "/success" },
-      });
+  try {
+    const result = await stripe.confirmPayment({
+      elements,
+      redirect: "if_required",
+    });
 
-      if (result.error) throw result.error;
+    if (result.error) throw result.error;
 
-      // Clear cart only after payment success
-      await fetch(`${process.env.REACT_APP_API_URL}/cart/${currentUser.id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/order/${currentUser.id}/complete`,
+      { method: "POST", credentials: "include" }
+    );
 
-      setOrderSuccess({ message: "Payment successful!" });
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to complete order");
 
-  return (
+    // ✅ 1. Clear global cart
+    setCartItems([]);
+    console.log("✅ Cart cleared");
+
+    // ✅ 2. Flag order completed
+    setOrderCompleted(true);
+
+    // ✅ 3. Show success, then redirect
+    setOrderSuccess({ message: "Payment successful and order completed!" });
+
+    setTimeout(() => {
+      navigate("/success");
+    }, 1500);
+
+  } catch (err) {
+    console.error(err);
+    setError(err.message || "Something went wrong during payment.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+return (
     <div className={styles.checkoutPage}>
       <div className={styles.formColumn}>
         <h3>Shipping Information</h3>
@@ -154,11 +176,14 @@ const CheckoutForm = ({
 };
 
 // --------- Wrapper ---------
-const CheckoutPageWrapper = ({ currentUser }) => {
-  const [cartItems, setCartItems] = useState([]);
-  const [shippingCost, setShippingCost] = useState(5);
-  const [loading, setLoading] = useState(true);
-  const [clientSecret, setClientSecret] = useState(null); 
+const CheckoutPageWrapper = ({
+  currentUser,
+  cartItems,
+  setCartItems,
+  shippingCost,
+  setShippingCost,
+}) => {
+  const [clientSecret, setClientSecret] = useState(null);
   const [shippingInfo, setShippingInfo] = useState({
     name: "",
     email: "",
@@ -166,6 +191,8 @@ const CheckoutPageWrapper = ({ currentUser }) => {
     city: "",
     postalCode: "",
   });
+  const [loading, setLoading] = useState(true);
+  const [orderCompleted, setOrderCompleted] = useState(false); // ✅ new flag
 
   useEffect(() => {
     if (!currentUser) return;
@@ -177,7 +204,6 @@ const CheckoutPageWrapper = ({ currentUser }) => {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to fetch cart");
-
         setCartItems(data);
       } catch (err) {
         console.error(err);
@@ -186,19 +212,24 @@ const CheckoutPageWrapper = ({ currentUser }) => {
       }
     };
 
-    fetchCart();
-  }, [currentUser]);
+    //Only fetch if cart is empty and order isn’t completed
+    if (cartItems.length === 0 && !orderCompleted) fetchCart();
+    else setLoading(false);
+  }, [currentUser, orderCompleted, cartItems, setCartItems]);
 
   if (!currentUser) return <p>Please log in to proceed to checkout.</p>;
   if (loading) return <p>Loading cart...</p>;
-  if (!cartItems || cartItems.length === 0) return <p>Your cart is empty.</p>;
+
+  // Don’t show “Your cart is empty” after payment
+  if (cartItems.length === 0 && !orderCompleted)
+    return <p>Your cart is empty.</p>;
 
   return (
     <>
       {!clientSecret ? (
-        // Render form without Stripe Elements
         <CheckoutForm
           cartItems={cartItems}
+          setCartItems={setCartItems}
           shippingCost={shippingCost}
           setShippingCost={setShippingCost}
           currentUser={currentUser}
@@ -206,12 +237,13 @@ const CheckoutPageWrapper = ({ currentUser }) => {
           setClientSecret={setClientSecret}
           shippingInfo={shippingInfo}
           setShippingInfo={setShippingInfo}
+          setOrderCompleted={setOrderCompleted} 
         />
       ) : (
-        // Render form WITH Stripe Elements after clientSecret is set
         <Elements stripe={stripePromise} options={{ clientSecret }}>
           <CheckoutForm
             cartItems={cartItems}
+            setCartItems={setCartItems}
             shippingCost={shippingCost}
             setShippingCost={setShippingCost}
             currentUser={currentUser}
@@ -219,11 +251,11 @@ const CheckoutPageWrapper = ({ currentUser }) => {
             setClientSecret={setClientSecret}
             shippingInfo={shippingInfo}
             setShippingInfo={setShippingInfo}
+            setOrderCompleted={setOrderCompleted}
           />
         </Elements>
       )}
     </>
   );
 };
-
 export default CheckoutPageWrapper;

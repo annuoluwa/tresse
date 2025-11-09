@@ -68,8 +68,12 @@ const UserProfilePage = ({ currentUser }) => {
 </button>
       <div className={styles.profileCard}>
         <div className={styles.avatar}>
-          {user.name?.charAt(0).toUpperCase()}
-        </div>
+  <img
+    src={`https://i.pravatar.cc/80?u=${user.email}`}
+    alt={`${user.name}'s avatar`}
+    className={styles.avatarImg}
+  />
+</div>
 
         {editing ? (
           <>
@@ -107,9 +111,9 @@ const UserProfilePage = ({ currentUser }) => {
             <p><strong>Name:</strong> {user.username}</p>
             <p><strong>Email:</strong> {user.email}</p>
 
-            <button onClick={() => setEditing(true)} className={styles.editBtn}>
+            {/*<button onClick={() => setEditing(true)} className={styles.editBtn}>
               Edit Profile
-            </button>
+            </button>*/}
           </>
         )}
       </div>

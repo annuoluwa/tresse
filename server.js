@@ -51,11 +51,11 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: 1000 * 60 * 60 // 1 hour
-  }
+  secure: process.env.NODE_ENV === 'production',
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 1000 * 60 * 60
+}
 }));
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('Cookie secure?', process.env.NODE_ENV === 'production');

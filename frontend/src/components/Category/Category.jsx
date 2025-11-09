@@ -37,7 +37,6 @@ function Category() {
 
   const handleClick = (name) => {
       navigate(`/category/${encodeURIComponent(name)}`);
-    alert(`You clicked on ${name}`);
   };
 
   return (

@@ -17,7 +17,10 @@ const PORT = process.env.PORT || 9000;
 
 
 app.use(cors({
-  origin: "https://tresse-frontend.onrender.com", 
+  origin: [
+    "https://tresse-frontend.onrender.com", 
+    "http://localhost:3000"
+  ],
   credentials: true,}));
 
 //import router 

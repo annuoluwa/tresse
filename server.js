@@ -1,4 +1,9 @@
-require('dotenv').config();
+const dotenv = require('dotenv');
+const path = require('path');
+
+dotenv.config({
+  path: path.resolve(__dirname, 'backend', '.env.local')
+});
 const express = require('express');
 const Stripe = require('stripe')
 const morgan = require('morgan')
@@ -57,8 +62,7 @@ app.use(session({
   maxAge: 1000 * 60 * 60
 }
 }));
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('Cookie secure?', process.env.NODE_ENV === 'production');
+
 
 
 
@@ -71,16 +75,22 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
   clientID: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: 'https://tresse.onrender.com/auth/google/callback'
-},
-(accessToken, refreshToken, profile, done) => {
+  callbackURL: process.env.NODE_ENV === 'production' 
+                ? 'https://tresse.onrender.com/auth/google/callback'
+                : 'http://localhost:9000/auth/google/callback'
+}, (accessToken, refreshToken, profile, done) => {
   return done(null, profile);
-}
-))
+}));
+console.log('Google Client ID:', process.env.CLIENT_ID);
+console.log('Google Client Secret:', process.env.CLIENT_SECRET ? 'Loaded' : 'Missing');
 
-app.get(
+ app.get(
   '/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    accessType: 'offline',
+    prompt: 'consent'
+  })
 );
 
 // Google OAuth callback

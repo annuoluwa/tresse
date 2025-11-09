@@ -84,8 +84,9 @@ function Login({ onLogin }) {
 
       <p>Or continue with</p>
 
-      <div className={styles.oAuth}>
-        <button onClick={() =>window.location.href = 'https://tresse.onrender.com/auth/google/callback'}>Google</button>
+      <div className={styles.oAuth}><button onClick={() => window.location.href = 'https://tresse.onrender.com/auth/google'}>
+  Google
+</button>
         {/*<button>Facebook</button>*/}
       </div>
     </div>

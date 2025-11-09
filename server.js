@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 9000;
 
 
 app.use(cors({
-  origin: "http://localhost:3000", 
+  origin: "https://tresse-frontend.onrender.com", 
   credentials: true,}));
 
 //import router 
@@ -68,7 +68,7 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
   clientID: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: 'http://localhost:9000/auth/google/callback'
+  callbackURL: 'https://tresse.onrender.com/auth/google/callback'
 },
 (accessToken, refreshToken, profile, done) => {
   return done(null, profile);
@@ -114,7 +114,7 @@ app.get(
         if (err) return next(err);
 
         //  Redirect to frontend
-        res.redirect('http://localhost:3000/');
+        res.redirect('https://tresse-frontend.onrender.com/');
       });
     } catch (err) {
       console.error("Google OAuth callback error:", err);

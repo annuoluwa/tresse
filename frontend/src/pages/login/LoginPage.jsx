@@ -17,7 +17,7 @@ function Login({ onLogin }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
-      credentials: "include", // important if using sessions/cookies
+      credentials: "include", // important for sessions/cookies
     });
 
     const data = await response.json();
@@ -86,7 +86,7 @@ function Login({ onLogin }) {
 
       <div className={styles.oAuth}>
         <button onClick={() =>window.location.href = 'http://localhost:9000/auth/google'}>Google</button>
-        <button>Facebook</button>
+        {/*<button>Facebook</button>*/}
       </div>
     </div>
   );

@@ -26,7 +26,7 @@ const {usersRouter} = require('./backend/routes/users');
 const {cartRouter} = require('./backend/routes/cart');
 const {orderRouter} = require('./backend/routes/order');
 const {categoryRouter} = require('./backend/routes/category');
-const {newsletterRouter} = require('./backend/routes/newsletter');
+const {newsletterRouter} = require('./backend/routes/newsletterRouter.js');
 
 
 

@@ -26,6 +26,8 @@ const {usersRouter} = require('./backend/routes/users');
 const {cartRouter} = require('./backend/routes/cart');
 const {orderRouter} = require('./backend/routes/order');
 const {categoryRouter} = require('./backend/routes/category');
+const {newsletterRouter} = require('./backend/routes/newsletterRouter');
+
 
 
 
@@ -88,7 +90,7 @@ app.get(
       const { id: googleId, displayName, emails } = req.user;
       const email = emails[0].value;
 
-      // 1️⃣ Check if the user already exists by google_id
+      //  Check if the user already exists by google_id
       let existingUser = await pool.query(
         "SELECT * FROM users WHERE google_id = $1",
         [googleId]
@@ -97,7 +99,7 @@ app.get(
       let dbUser;
 
       if (!existingUser.rows.length) {
-        // 2️⃣ Insert new user and get DB record
+        //  Insert new user and get DB record
         const insertResult = await pool.query(
           "INSERT INTO users (username, email, google_id) VALUES ($1, $2, $3) RETURNING *",
           [displayName, email, googleId]
@@ -107,7 +109,7 @@ app.get(
         dbUser = existingUser.rows[0];
       }
 
-      // 3️⃣ Log in the DB user, NOT the raw Google profile
+      // Log in the DB user
       req.login(dbUser, (err) => {
         if (err) return next(err);
 
@@ -127,7 +129,8 @@ app.use('/products', productRouter);
 app.use('/users', usersRouter);
 app.use('/cart', cartRouter);
 app.use('/order', orderRouter);
-app.use('/category', categoryRouter)
+app.use('/category', categoryRouter);
+app.use('/newsletter', newsletterRouter)
 
 //error handling 
 if (process.env.NODE_ENV === 'development') {

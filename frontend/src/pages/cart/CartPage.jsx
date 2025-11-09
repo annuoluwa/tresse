@@ -138,9 +138,11 @@ console.log("CartPage items:", cartItems);
               <img src={item.imageUrl} alt={item.name} className={styles.cartImage} />
               <div className={styles.itemDetails}>
                 <span className={styles.itemName}>{item.name}</span>
-                <span className={styles.itemSize}>
-                  Size: {item.selectedVariant?.variant_type === "Size" ? item.selectedVariant.variant_value : "N/A"}
-                </span>
+               <span className={styles.itemVariant}>
+  {item.selectedVariant
+    ? `${item.selectedVariant.variant_type}: ${item.selectedVariant.variant_value}`
+    : "N/A"}
+</span>
                 <div className={styles.itemQuantityControls}>
                   <button onClick={() => decreaseQuantity(item.id, item.selectedVariant?.id)}>-</button>
                   <span>{item.quantity}</span>

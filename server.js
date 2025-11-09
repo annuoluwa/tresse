@@ -12,7 +12,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors') 
-const PORT = 9000;
+const PORT = process.env.PORT || 9000;
 
 
 

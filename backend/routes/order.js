@@ -114,11 +114,11 @@ async function completeOrder(req, res) {
     // Clear cart
     await pool.query(`DELETE FROM carts WHERE userid = $1`, [userId]);
 
-    console.log(`✅ Order ${orderId} marked as PAID for user ${userId}`);
+    console.log(`Order ${orderId} marked as PAID for user ${userId}`);
     res.json({ message: "Order completed successfully" });
 
   } catch (error) {
-    console.error("❌ Error completing order:", error);
+    console.error(" Error completing order:", error);
     res.status(500).json({ error: "Server error while completing order" });
   }
 }

@@ -2,7 +2,7 @@ const express = require('express');
 const cartRouter = express.Router();
 const pool = require('../db');
 const Stripe = require('stripe');
-const { isLoggedIn } = require('./users');
+const  isLoggedIn  = require('../middleware/isLoggedIn');
 const stripe = Stripe(process.env.STRIPE_SK);
 
 // ----------------------- ADD TO CART -----------------------
@@ -172,7 +172,7 @@ async function checkout(req, res, next) {
     res.json({ clientSecret: paymentIntent.client_secret });
 
   } catch (error) {
-    console.error("❌ Checkout error:", error);
+    console.error(" Checkout error:", error);
     res.status(500).json({ error: "Server error during checkout." });
   }
 }

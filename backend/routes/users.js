@@ -3,22 +3,12 @@ const usersRouter = express.Router();
 const pool = require('../db');
 const{ Users } = require('../helperFunctions/helper')
 const passport = require('passport');
-const {passwordHash} = require('../passport')
+const {passwordHash} = require('../passport');
+const isLoggedIn = require('../middleware/isLoggedIn')
+const isAdmin = require('../middleware/admin');
 
-//middleware to check log in
-function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated()) {
-      return next();
-  }
-  return res.status(401).json({ message: "Not authenticated" });
-}
 
-function isAdmin(req, res, next) {
-    if(req.user && req.user.is_admin === true) {
-        return next();
-    }
-    return res.status(403).json({error: "Access denied"});
-}
+
 
 //login
 //browser redirect logic
@@ -228,7 +218,7 @@ res.status(200).json({message: "Account deleted successfully"});
 
 };
 
-module.exports ={ usersRouter, isAdmin, isLoggedIn, deleteUserPath, updateUserRoute, getUserById, getAllProfilesByAdmin, registerNewUser, userLogout, userBrowserLogin};
+module.exports ={ usersRouter, deleteUserPath, updateUserRoute, getUserById, getAllProfilesByAdmin, registerNewUser, userLogout, userBrowserLogin};
 usersRouter.post('/login', userBrowserLogin)
 //usersRoute.post('/login', userLogin)
 usersRouter.post('/logout', userLogout)

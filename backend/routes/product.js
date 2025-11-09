@@ -1,7 +1,7 @@
 const express = require('express');
 const productRouter = express.Router();
 const pool =require('../db');
-const {isAdmin} = require('./users');
+const isAdmin = require('../middleware/admin');
 const {categoryHelper} = require('./category')
 
 //router.param for product id
@@ -165,7 +165,7 @@ return res.json(result.rows[0])
 };
 
 //Delete Products by ID
- async function deleteProduct(req, res,next) {
+ async function deleteProduct(req, res, next) {
   try {
         const id = parseInt(req.params.id)
     const result = await pool.query("DELETE FROM products WHERE id = $1", [id]);
@@ -178,6 +178,71 @@ return res.json(result.rows[0])
   }
 };
 
+
+//Get products by brands
+async function getBrands(req, res, next) {
+  try{
+const brandName = req.params.name;
+const result = await pool.query(
+  `
+  SELECT 
+    p.id,
+    p.name,
+    p.description,
+    p.brand,
+    p.main_page_url AS "imageUrl",
+    COALESCE(
+      json_agg(
+        json_build_object(
+          'id', v.id,
+          'variant_type', v.variant_type,
+          'variant_value', v.variant_value,
+          'price', v.price
+        )
+      ) FILTER (WHERE v.id IS NOT NULL),
+      '[]'
+    ) AS variants
+  FROM products p
+  LEFT JOIN variants v ON p.id = v.product_id
+  WHERE LOWER(p.brand) = LOWER($1)
+  GROUP BY p.id, p.name, p.description, p.brand, p.main_page_url
+  ORDER BY p.id;
+  `,
+  [brandName]
+);
+    console.log("Direct query result:", result.rows)
+if(result.rows.length === 0) {
+  return res.status(404).json({message: "No product for this brand"})
+}
+res.status(200).send(result.rows)
+
+  }catch(err){
+console.error(err)
+res.status(500).json({message: "Server error"})
+  }
+}
+
+// GET /products/search?term=...
+async function searchProducts(req, res) {
+  const { term } = req.query;
+  if (!term) return res.status(400).json({ error: 'Search term required' });
+
+  try {
+    const searchTerm = String(term);
+
+    const result = await pool.query(
+      'SELECT * FROM products WHERE name ILIKE $1',
+      [`%${searchTerm}%`]
+    );
+
+    console.log('Search results for', searchTerm, ':', result.rows.length);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Database search error:', err.message);
+    res.status(500).json({ error: 'Database error', details: err.message });
+  }
+}
+
 module.exports = {
   productRouter,
   categoryHelper,
@@ -186,13 +251,18 @@ module.exports = {
   getProductByCategory,
   addProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getBrands,
+  searchProducts
 }
 
 
 productRouter.get('/', getAllProducts);
+productRouter.get('/search', searchProducts)
 productRouter.get('/:id', getProductsById);
 productRouter.get('/category/:name', getProductByCategory)
 productRouter.post('/', isAdmin, addProduct);
 productRouter.put('/:id', updateProduct);
-productRouter.delete('/:id', deleteProduct)
+productRouter.delete('/:id', deleteProduct);
+productRouter.get('/brand/:name', getBrands);
+

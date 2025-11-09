@@ -6,6 +6,9 @@
   color: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .productDetailPage h1 {
@@ -45,24 +48,74 @@
   align-items: center;
   gap: 1rem;
   margin-top: 1rem;
+  
 }
-
-.variantSelect {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+/* --- Custom Dropdown Styles --- */
+.variantDropdown {
+  position: relative;
+  width: 250px;
+  background: rgba(2, 31, 43, 0.7); /* transparent over hero banner */
   border: 1px solid var(--accent-silver);
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
   color: #fff;
+  padding: 0.6rem 1rem;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.3s, border-color 0.3s;
+  transition: all 0.3s ease;
 }
 
-.variantSelect:hover {
-  background: var(--gradient-soft);
+.variantDropdown:hover {
   border-color: var(--accent-rose);
+  background: rgba(2, 31, 43, 0.85);
 }
 
+.selectedVariant {
+  font-weight: bold;
+  color: var(--accent-blush);
+}
+
+.dropdownArrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-blush);
+  font-size: 0.9rem;
+}
+
+.dropdownList {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+  background: rgba(2, 31, 43, 0.85);
+  border: 1px solid var(--accent-silver);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  backdrop-filter: blur(8px);
+}
+
+.dropdownList li {
+  padding: 0.5rem 1rem;
+  color: #fff;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.dropdownList li:hover {
+  background: var(--gradient-soft);
+  color: #0F2027;
+  font-weight: 600;
+}
+
+.activeVariant {
+  background: var(--accent-blush);
+  color: #0F2027;
+  font-weight: bold;
+}
 .price {
   font-size: 1.2rem;
   font-weight: bold;
@@ -97,17 +150,18 @@
 
 .addToCartBtn {
   padding: 0.5rem 1.2rem;
-  background: var(--accent-rose);
+  background: var(--gradient-soft);
   border: none;
   border-radius: 8px;
   color: #fff;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
+  
 }
 
 .addToCartBtn:hover {
-  background: var(--accent-blush);
+  border: solid, plum;
   transform: scale(1.05);
 }
 
@@ -116,4 +170,10 @@
   text-align: center;
   color: var(--accent-blush);
   font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .image{ 
+    max-width: 35%;
+  }
 }

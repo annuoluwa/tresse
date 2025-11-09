@@ -130,4 +130,4 @@ npm test
 
 ## 10. Contact
 **For questions or collaboration, contact:**
-leezab3thyomi@gmail.com
+leezabethyomi@gmail.com

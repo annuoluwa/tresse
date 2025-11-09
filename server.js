@@ -26,7 +26,7 @@ const {usersRouter} = require('./backend/routes/users');
 const {cartRouter} = require('./backend/routes/cart');
 const {orderRouter} = require('./backend/routes/order');
 const {categoryRouter} = require('./backend/routes/category');
-const {newsletterRouter} = require('./backend/routes/newsletterRouter');
+const {newsletterRouter} = require('./backend/routes/newsletter');
 
 
 
@@ -113,7 +113,7 @@ app.get(
       req.login(dbUser, (err) => {
         if (err) return next(err);
 
-        // 4️⃣ Redirect to frontend
+        //  Redirect to frontend
         res.redirect('http://localhost:3000/');
       });
     } catch (err) {

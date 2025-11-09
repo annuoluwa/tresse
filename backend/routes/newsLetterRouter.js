@@ -33,9 +33,9 @@ const newsletterRouter = express.Router();
 };
 
 
-newsletterRouter.post("/subscribe", Newsletter);
-
 module.exports = {
     newsletterRouter,
     Newsletter
 };
+newsletterRouter.post("/subscribe", Newsletter);
+

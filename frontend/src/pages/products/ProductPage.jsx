@@ -4,57 +4,81 @@ import styles from "./ProductPage.module.css";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-const ProductPage = ({ addToCart }) => {
+const ProductPage = ({ selectedBrand, addToCart }) => {
   const [products, setProducts] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [selectedVariants, setSelectedVariants] = useState({});
+  
 
-  useEffect(() => {
-    // Fetch products from backend
-    fetch(`${API_URL}/products`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch products");
-        return res.json();
-      })
-      .then((data) => {
-        setProducts(data);
-        setLoading(false);
 
-        // Initialize selectedVariants with first variant for each product
-        const initialVariants = {};
-        data.forEach((product) => {
-          if (product.variants?.length) {
-            initialVariants[product.id] = product.variants[0].id;
-          }
-        });
-        setSelectedVariants(initialVariants);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
+useEffect(() => {
+  setLoading(true);
+  setError(null);
+
+  const url = selectedBrand
+    ? `${API_URL}/products/brand/${selectedBrand}`
+    : `${API_URL}/products`;
+
+  fetch(url)
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to fetch products");
+      return res.json();
+    })
+    .then((data) => {
+      setProducts(data);
+
+      // initialize variants
+      const initialVariants = {};
+      data.forEach((product) => {
+        if (product.variants?.length) {
+          initialVariants[product.id] = product.variants[0].id;
+        }
       });
-  }, []);
+      setSelectedVariants(initialVariants);
+      setLoading(false);
+    })
+    .catch((err) => {
+      setError(err.message);
+      setLoading(false);
+    });
+}, [selectedBrand]);
 
-  if (loading) return <p>Loading products...</p>;
+
+if (loading) return <p>Loading products...</p>;
   if (error) return <p>Error: {error}</p>;
 
   const handleVariantChange = (productId, variantId) => {
     setSelectedVariants((prev) => ({ ...prev, [productId]: variantId }));
   };
 
-  const handleAddToCart = (product) => {
-    const variantId = selectedVariants[product.id];
-    const variant =
-      product.variants.find((v) => v.id === variantId) || {
-        id: 0,
-        price: 0,
-        size: "N/A",
-      };
+const handleAddToCart = (product) => {
+  // Ensure the product actually has variants
+  if (!Array.isArray(product.variants) || product.variants.length === 0) {
+    console.warn("Product has no variants:", product);
+    return; // hide the button for such products
+  }
 
-    addToCart({ ...product, selectedVariant: variant });
-  };
+  // Get the selected variant ID from state, fallback to the first variant
+  const variantId = selectedVariants[product.id] || product.variants[0].id;
+
+  // Find the full variant object
+  const variant = product.variants.find((v) => v.id === variantId);
+
+  if (!variant) {
+    console.error("Selected variant not found for product:", product);
+    return;
+  }
+
+  // Call addToCart with product + selected variant
+  addToCart({
+    ...product,
+    selectedVariant: variant,
+  });
+  console.log("Product:", product);
+console.log("Selected Variant ID:", variantId);
+console.log("Variant object:", variant);
+};
 
   return (
     <div className={styles.productPage}>
@@ -75,34 +99,34 @@ const ProductPage = ({ addToCart }) => {
             <h3 className={styles.name}>{product.name}</h3>
             
                 {/* Product Description*/}
-                <p className={styles.description}>{product.description}</p>
-                <Link to={`/products/${product.id}`}>Read More</Link>
+                <p className={styles.description}>{product.description}
+                  <Link className={styles.read} to={`/products/${product.id}`}>...Read More</Link>
+                </p>
+                
 
             {/* Variant Selector */}
-            {product.variants?.length > 0 && (
-              <select
-                value={selectedVariants[product.id]}
-                onChange={(e) =>
-                  handleVariantChange(product.id, Number(e.target.value))
-                }
-                className={styles.variantSelector}
-              >
-                
-              {product.variants.map((v, idx) => (
-                <option key={idx} value={v.variant_value}>
-                  {v.variant_type}: {v.variant_value} - £{Number(v.price).toFixed(2)}
-                </option>
-              ))}
-
-              </select>
-            )}
+{product.variants?.length > 0 && (
+  <select
+    value={selectedVariants[product.id]}
+    onChange={(e) =>
+      handleVariantChange(product.id, Number(e.target.value))
+    }
+    className={styles.variantSelector}
+  >
+    {product.variants.map((v) => (
+      <option key={v.id} value={v.id}>
+        {v.variant_type}: {v.variant_value} - £{Number(v.price).toFixed(2)}
+      </option>
+    ))}
+  </select>
+)}
 
             {/* Add to Cart button */}
             <button
-              className={styles.addBtn}
-              onClick={() => handleAddToCart(product)}
+              className={styles.addBtn} 
+              onClick={() => handleAddToCart(product) }
             >
-              Add to Cart
+              Add to Cart 
             </button>
           </div>
         ))}

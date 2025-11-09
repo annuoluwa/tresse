@@ -35,6 +35,9 @@ function AppInner() {
   const [cartItems, setCartItems] = useState([]);
   const [shippingCost, setShippingCost] = useState(5);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [selectedBrand, setSelectedBrand] = useState(null);
+  
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,7 +48,7 @@ function AppInner() {
         console.log("Fetch /users/me response:", userResponse.status);
 
         if (userResponse.ok) {
-          // ✅ Session is valid
+          // Session is valid
           const userData = await userResponse.json();
           setCurrentUser(userData);
           sessionStorage.setItem("currentUser", JSON.stringify(userData));
@@ -55,7 +58,7 @@ function AppInner() {
           const cartData = await cartResponse.json();
           setCartItems(cartData);
         } else {
-          // 🚫 No valid session or expired
+          // No valid session or expired
           setCurrentUser(null);
           sessionStorage.removeItem("currentUser");
           setCartItems([]);
@@ -73,7 +76,7 @@ function AppInner() {
     fetchCurrentUser();
   }, []);
 
-  // 🔒 Remove any stale cart data from past sessions
+  //Remove any stale cart data from past sessions
   useEffect(() => {
     sessionStorage.removeItem("cartItems");
   }, []);
@@ -135,12 +138,26 @@ function AppInner() {
 
   if (loadingUser) return <div>Loading...</div>;
 
+  //logic for handling shop collections
+     const handleShowAllProducts = () => {
+    setSelectedBrand(null);         // reset any brand filter
+    navigate("/products");         
+  };
+
+
+  
   return (
     <>
-      <NavBar cartCount={cartItems.length} user={currentUser} logoutHandler={handleLogout} />
+
+      <NavBar 
+      cartCount={cartItems.length} 
+      user={currentUser} 
+      logoutHandler={handleLogout} 
+      onShowAllProducts={() => setSelectedBrand(null)}
+      />
       <div>
         <Routes>
-          <Route path="/" element={<Home addToCart={addToCart} />} />
+          <Route path="/" element={<Home addToCart={addToCart}  onBrandSelect={setSelectedBrand}  onShowAllProducts={handleShowAllProducts}/>} />
           <Route
             path="/login"
             element={
@@ -174,6 +191,7 @@ function AppInner() {
                 setCartItems={setCartItems}
                 addToCart={addToCart}
                 userId={currentUser?.id}
+                selectedBrand={selectedBrand}
               />
             }
           />
@@ -199,9 +217,11 @@ function AppInner() {
           <Route path="/orders" element={<OrderHistoryPage currentUser={currentUser} />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/category/:name" element={<CategoryProductsPage />} />
+          
         </Routes>
       </div>
       <Footer />
+
     </>
   );
 }

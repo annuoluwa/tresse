@@ -1,11 +1,3 @@
-:root {
-  --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
-  --gradient-soft: linear-gradient(90deg, #FBC2EB, #6f9ae6);
-  --accent-rose: #ddb3b9; /* rose gold */
-  --accent-blush: #f8b9c4; /* blush pink */
-  --accent-silver: #c0c0c0; /* muted silver */
-}
-
 
 
 .heroBanner {
@@ -110,4 +102,32 @@
   background: linear-gradient(90deg, #f7e4f1, #699af0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+
+@media (max-width: 768px) {
+  .heroOverlay {
+    padding: 1.5rem;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .heroCaption h1 {
+    font-size: 2rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+
+  .heroSubCaption h3 {
+    font-size: 1rem;
+    max-width: 90%;
+    margin: 0 auto 1rem;
+    line-height: 1.5;
+  }
+
+  .heroButtons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
 }

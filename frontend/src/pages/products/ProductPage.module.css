@@ -1,10 +1,3 @@
-:root {
-  --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
-  --gradient-soft: linear-gradient(90deg, #fbc2eb, #6f9ae6);
-  --accent-rose: #ddb3b9;
-  --accent-blush: #f8b9c4;
-  --accent-silver: #c0c0c0;
-}
 
 /* === Page Layout === */
 .productPage {
@@ -61,7 +54,7 @@
   object-fit: contain;
   border-radius: 1rem;
   margin-bottom: 1rem;
-  background: var(--gradient-soft);
+  background: transparent;
   padding: 0.5rem;
 }
 
@@ -81,6 +74,10 @@
   color: #fff;
   margin-bottom: 1rem;
 
+}
+
+.read {
+  font-size: 0.8rem;
 }
 
 /* === Variant Selector === */
@@ -133,4 +130,6 @@
   .image {
     height: 180px;
   }
+
+  
 }

@@ -4,12 +4,12 @@ import Category from "../../components/Category/Category";
 import Partners from "../../components/Partners/Partners";
 
 
-function Home() {
+function Home({onBrandSelect, onShowAllProducts}) {
   return (
     <div>
-      <HeroBanner />
+      <HeroBanner onShowAllProducts={onShowAllProducts}/>
       <Category />
-      <Partners />
+      <Partners onBrandSelect={onBrandSelect}/>
     </div>
   );
 }

@@ -26,7 +26,7 @@ const CheckoutForm = ({
   const [totals, setTotals] = useState({ subtotal: 0, tax: 0, total: 0 });
   const [loading, setLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
-  const [error, setError] = useState('');
+  const [_error, setError] = useState('');
   const navigate = useNavigate();
 
   // Calculate totals whenever cart or shipping changes
@@ -89,14 +89,14 @@ const handlePayment = async () => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to complete order");
 
-    // ✅ 1. Clear global cart
+    // Clear global cart
     setCartItems([]);
-    console.log("✅ Cart cleared");
+    console.log(" Cart cleared");
 
-    // ✅ 2. Flag order completed
+    //  Flag order completed
     setOrderCompleted(true);
 
-    // ✅ 3. Show success, then redirect
+    // Show success, then redirect
     setOrderSuccess({ message: "Payment successful and order completed!" });
 
     setTimeout(() => {
@@ -192,7 +192,7 @@ const CheckoutPageWrapper = ({
     postalCode: "",
   });
   const [loading, setLoading] = useState(true);
-  const [orderCompleted, setOrderCompleted] = useState(false); // ✅ new flag
+  const [orderCompleted, setOrderCompleted] = useState(false); // new flag
 
   useEffect(() => {
     if (!currentUser) return;

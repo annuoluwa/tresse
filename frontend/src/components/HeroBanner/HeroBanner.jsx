@@ -1,7 +1,18 @@
 import React from "react";
 import styles from "./HeroBanner.module.css"
 
-function HeroBanner()  {
+function HeroBanner({onShowAllProducts})  {
+
+const handleClick = () => {
+    const partnersSection = document.getElementById("partners");
+    if (partnersSection) { 
+    const yOffset = -270; // negative means scroll up less
+    const y = partnersSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({ top: y, behavior: "smooth" });
+    }
+}
+
+
     return (
 <section className= {styles.heroBanner}>
 <img 
@@ -14,7 +25,7 @@ className={styles.heroImage}
 
 <div className={styles.heroSubCaption}><h3>Discover premium hair, beauty, and self-care products from the world's most trusted brands.</h3></div>
 <div className={styles.heroButtons}>
-<button className={styles.primaryBtn}>Shop Collection &gt; </button>  <button className={styles.secondaryBtn}>Explaore Brands</button>
+<button className={styles.primaryBtn} onClick={onShowAllProducts}>Shop Collection &gt; </button>  <button className={styles.secondaryBtn} onClick={()=>handleClick()}>Explore Brands</button>
 </div>
 </div>
 </section>

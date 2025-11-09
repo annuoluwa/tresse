@@ -50,7 +50,7 @@ border: 2px solid #FBC2EB,;
 border-radius: 50%;
 padding: 0.9rem;
 position: relative;
-top: 1.2rem;
+top: 0.1rem;
 background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
 color: yellow;
 font-size: 1.9rem;
@@ -126,4 +126,108 @@ gap: 1.5rem;
 
 .footerLinks a:hover {
     color: #FBC2EB
+}
+
+/*media query*/
+
+@media (max-width: 1024px) {
+  .footer {
+    padding: 3rem 1.5rem;
+  }
+
+  .footerLink {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .captionContainer {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footerCaption p {
+    max-width: 100%;
+  }
+
+  .footerIcon {
+    justify-content: center;
+  }
+}
+
+/* Mobile screens (≤ 768px) */
+@media (max-width: 768px) {
+  .footer {
+    padding: 2rem 1rem;
+  }
+
+  .captionContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .footerCaption h4 {
+    font-size: 1.2rem;
+  }
+
+  .footerCaption p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .footerLink {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footerColumn h5 {
+    font-size: 1rem;
+  }
+
+  .footerColumn a {
+    font-size: 0.9rem;
+  }
+
+  .footerIcon {
+    gap: 0.8rem;
+    font-size: 1.3rem;
+  }
+
+  /* Hide less important sections for mobile */
+  .footerLinks {
+    display: none;
+  }
+
+  .lastFooter {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+}
+
+/* Very small screens (≤ 480px) */
+@media (max-width: 480px) {
+  .footer {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .footerCaption h4 {
+    font-size: 1rem;
+  }
+
+  .logo {
+    font-size: 1.3rem;
+    padding: 0.6rem;
+  }
+
+  .footerIcon {
+    font-size: 1.2rem;
+  }
+
+  .footerLink {
+    gap: 1rem;
+  }
 }

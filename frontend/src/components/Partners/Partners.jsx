@@ -1,9 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Partners.module.css';
 
-function Partners() {
+function Partners({onBrandSelect}) {
+//subscribe logic
+ const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+const API_URL = process.env.REACT_APP_API_URL;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+
+    try {
+      const res = await fetch(`${API_URL}/newsletter/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      setMessage(data.message || "Subscription successful!");
+    } catch (err) {
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
+
+const navigate = useNavigate();
+
+  const handleBrandClick = (brand) => {
+    onBrandSelect(brand);
+    navigate("/products"); 
+  };
+
+
     return (
-        <section className={styles.partners}>
+        
+        <section className={styles.partners}>       {/*partner brands*/}
             <div className={styles.partnersContainer}>
         <div className={styles.partnersCaption}>
             <h3>Luxury Brands</h3>
@@ -11,14 +46,14 @@ function Partners() {
         </div>
         
         <div className={styles.partnersBtns} id='partners'>
-            <button className={styles.partnerBtn}>Remington</button>
-            <button className={styles.partnerBtn}>Dyson</button>
-            <button className={styles.partnerBtn}>Conair</button>
-            <button className={styles.partnerBtn}>L'Oreal</button>
-            <button className={styles.partnerBtn}>Morroccanoil</button>
-            <button className={styles.partnerBtn}>Pantene</button>
-            <button className={styles.partnerBtn}>Olaplex</button>
-            <button className={styles.partnerBtn}>EIS</button>
+            <button onClick={() => handleBrandClick("Remington")}className={styles.partnerBtn}>Remington</button>
+            <button onClick={() => handleBrandClick("Dyson")}className={styles.partnerBtn}>Dyson</button>
+            <button onClick={() => handleBrandClick("Conair")}className={styles.partnerBtn}>Conair</button>
+            <button onClick={() => handleBrandClick("L'Oreal")}className={styles.partnerBtn}>L'Oreal</button>
+            <button onClick={() => handleBrandClick("Moroccanoil")}className={styles.partnerBtn}>Morroccanoil</button>
+            <button onClick={() => handleBrandClick("Pantene")}className={styles.partnerBtn}>Pantene</button>
+            <button onClick={() => handleBrandClick("Olaplex")}className={styles.partnerBtn}>Olaplex</button>
+           
         </div>
         
         </div>
@@ -32,8 +67,18 @@ function Partners() {
 </p>
 </div>
 
-<input type='text' placeholder='Enter your email'>
-</input> <button className={styles.subBtn}>Subscribe</button>
+{/*subscribe section */}
+         <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Enter your email"
+        required
+      />
+      <button type="submit" className={styles.subBtn}>Subscribe</button>
+      {message && <p>{message}</p>}
+    </form>
 
         </div>
         </section>

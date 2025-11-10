@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 dotenv.config({
-  path: path.resolve(__dirname, 'backend', '.env.local')
+  path: path.resolve(__dirname, 'backend', '.env')
 });
 const express = require('express');
 const Stripe = require('stripe')

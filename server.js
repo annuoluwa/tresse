@@ -81,8 +81,7 @@ passport.use(new GoogleStrategy({
 }, (accessToken, refreshToken, profile, done) => {
   return done(null, profile);
 }));
-console.log('Google Client ID:', process.env.CLIENT_ID);
-console.log('Google Client Secret:', process.env.CLIENT_SECRET ? 'Loaded' : 'Missing');
+
 
  app.get(
   '/auth/google',

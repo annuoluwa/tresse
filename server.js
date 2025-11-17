@@ -30,17 +30,28 @@ app.use(morgan('dev'));
 
 //Session
 app.use(session({
-  store: new pgSession({ pool, tableName: 'session', createTableIfMissing: true }),
+  store: new pgSession({ 
+    pool, 
+    tableName: 'session', 
+    createTableIfMissing: true 
+  }),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax', // Changed from 'none'
+    sameSite: 'lax',
     maxAge: 1000 * 60 * 60
   }
 }));
+
+// Debug middleware - add this right after session
+app.use((req, res, next) => {
+  console.log('Session ID:', req.sessionID);
+  console.log('Session:', req.session);
+  next();
+});
 
 //Passport
 app.use(passport.initialize());

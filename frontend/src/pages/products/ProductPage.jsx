@@ -55,7 +55,6 @@ if (loading) return <p>Loading products...</p>;
 const handleAddToCart = (product) => {
   // Ensure the product actually has variants
   if (!Array.isArray(product.variants) || product.variants.length === 0) {
-    console.warn("Product has no variants:", product);
     return; // hide the button for such products
   }
 
@@ -66,7 +65,6 @@ const handleAddToCart = (product) => {
   const variant = product.variants.find((v) => v.id === variantId);
 
   if (!variant) {
-    console.error("Selected variant not found for product:", product);
     return;
   }
 
@@ -75,9 +73,6 @@ const handleAddToCart = (product) => {
     ...product,
     selectedVariant: variant,
   });
-  console.log("Product:", product);
-console.log("Selected Variant ID:", variantId);
-console.log("Variant object:", variant);
 };
 
   return (

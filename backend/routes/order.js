@@ -6,7 +6,6 @@ const pool = require('../db');
 async function getOrdersByUser(req, res, next) {
   try {
     const userIdInt = parseInt(req.params.userId, 10);
-    console.log('Fetching orders for userId:', userIdInt);
 
     const { rows: orders } = await pool.query(`
       SELECT o.id AS order_id,
@@ -105,7 +104,7 @@ async function completeOrder(req, res) {
 
     const orderId = pendingOrders[0].id;
 
-    // Mark it as paid
+    // Mark as paid
     await pool.query(
       `UPDATE orders SET status = 'paid' WHERE id = $1`,
       [orderId]
@@ -114,8 +113,7 @@ async function completeOrder(req, res) {
     // Clear cart
     await pool.query(`DELETE FROM carts WHERE userid = $1`, [userId]);
 
-    console.log(`Order ${orderId} marked as PAID for user ${userId}`);
-    res.json({ message: "Order completed successfully" });
+   res.json({ message: "Order completed successfully" });
 
   } catch (error) {
     console.error(" Error completing order:", error);

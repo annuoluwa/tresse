@@ -1,157 +1,105 @@
 const dotenv = require('dotenv');
 const path = require('path');
-
 dotenv.config({
-  path: path.resolve(__dirname, 'backend', '.env')
+  path: process.env.NODE_ENV === 'production'
+    ? path.resolve(__dirname, '.env.production')
+    : path.resolve(__dirname, 'backend', '.env')
 });
+
 const express = require('express');
-const Stripe = require('stripe')
-const morgan = require('morgan')
-const app = express();
+const Stripe = require('stripe');
+const morgan = require('morgan');
 const errorHandler = require('errorhandler');
 const pool = require('./backend/db');
-const passport = require("passport");
-const Localstrategy = require("passport-local");
-const passportJs = require('./backend/passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const passport = require('./backend/passport').passport;
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const cors = require('cors') 
+const cors = require('cors');
+
 const PORT = process.env.PORT || 9000;
+const app = express();
 
 
-
+//CORS
 app.use(cors({
-  origin: [
-    "https://tresse-frontend.onrender.com", 
-    "http://localhost:3000"
-  ],
-  credentials: true,}));
-
-//import router 
-const {productRouter} = require('./backend/routes/product');
-const {usersRouter} = require('./backend/routes/users');
-const {cartRouter} = require('./backend/routes/cart');
-const {orderRouter} = require('./backend/routes/order');
-const {categoryRouter} = require('./backend/routes/category');
-const {newsletterRouter} = require('./backend/routes/newsLetterRouter');
-
-
-
-
-//parse json
-app.use(express.json());
-const stripe = Stripe(process.env.STRIPE_SK);
-
-app.use(morgan('dev'));
-
-//session
-app.use(session({
-  store: new pgSession({
-    pool: pool,              
-    tableName: 'session',
-    createTableIfMissing: true 
-  }),
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-  secure: process.env.NODE_ENV === 'production',
-  httpOnly: true,
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  maxAge: 1000 * 60 * 60
-}
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true
 }));
 
+//Body parser
+app.use(express.json());
+const stripe = Stripe(process.env.STRIPE_SK);
+app.use(morgan('dev'));
 
 
+//Session
+app.use(session({
+  store: new pgSession({ pool, tableName: 'session', createTableIfMissing: true }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined,
+    maxAge: 1000 * 60 * 60
+  }
+}));
 
-//passport
+//Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-//Google OAuth strategy
-passport.use(new GoogleStrategy({
-  clientID: process.env.CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: process.env.NODE_ENV === 'production' 
-                ? 'https://tresse.onrender.com/auth/google/callback'
-                : 'http://localhost:9000/auth/google/callback'
-}, (accessToken, refreshToken, profile, done) => {
-  return done(null, profile);
-}));
-
-
- app.get(
-  '/auth/google',
+//OAuth routes
+app.get('/auth/google',
   passport.authenticate('google', { 
-    scope: ['profile', 'email'],
-    accessType: 'offline',
-    prompt: 'consent'
+    scope: ['profile', 'email'], 
+    accessType: 'offline', 
+    prompt: 'consent' 
   })
 );
 
-// Google OAuth callback
-app.get(
-  '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login', session: true }),
   async (req, res, next) => {
     try {
-      // Extract info from Google profile
-      const { id: googleId, displayName, emails } = req.user;
-      const email = emails[0].value;
-
-      //  Check if the user already exists by google_id
-      let existingUser = await pool.query(
-        "SELECT * FROM users WHERE google_id = $1",
-        [googleId]
-      );
-
-      let dbUser;
-
-      if (!existingUser.rows.length) {
-        //  Insert new user and get DB record
-        const insertResult = await pool.query(
-          "INSERT INTO users (username, email, google_id) VALUES ($1, $2, $3) RETURNING *",
-          [displayName, email, googleId]
-        );
-        dbUser = insertResult.rows[0];
-      } else {
-        dbUser = existingUser.rows[0];
-      }
-
-      // Log in the DB user
-      req.login(dbUser, (err) => {
-        if (err) return next(err);
-
-        //  Redirect to frontend
-        res.redirect('https://tresse-frontend.onrender.com/');
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.redirect(`${process.env.CORS_ORIGIN}/login?error=session_failed`);
+        }
+        res.redirect(`${process.env.CORS_ORIGIN}/oauth-success`);
       });
     } catch (err) {
-      console.error("Google OAuth callback error:", err);
-      next(err);
+      console.error("OAuth callback error:", err);
+      res.redirect(`${process.env.CORS_ORIGIN}/login?error=oauth_failed`);
     }
   }
 );
 
 
-//mount all routes
+//API Routes
+const { productRouter } = require('./backend/routes/product');
+const { usersRouter } = require('./backend/routes/users');
+const { cartRouter } = require('./backend/routes/cart');
+const { orderRouter } = require('./backend/routes/order');
+const { categoryRouter } = require('./backend/routes/category');
+const { newsletterRouter } = require('./backend/routes/newsLetterRouter');
+
 app.use('/products', productRouter);
 app.use('/users', usersRouter);
 app.use('/cart', cartRouter);
 app.use('/order', orderRouter);
 app.use('/category', categoryRouter);
-app.use('/newsletter', newsletterRouter)
+app.use('/newsletter', newsletterRouter);
 
-//error handling 
 if (process.env.NODE_ENV === 'development') {
-  app.use(errorHandler()); // dev-friendly stack traces
+  app.use(errorHandler());
 }
 
-//central error handler
-app.use((err, req, res, next)=>{
-  console.error('Central error:', err); // full error log
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
   res.status(err.status || 500).json({
     error: err.message,
     stack: err.stack
@@ -161,11 +109,7 @@ app.use((err, req, res, next)=>{
 app.get('/', (req, res) => res.send('Server is running!'));
 
 app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`)
+  console.log(`Server listening on port ${PORT}`);
 });
 
-module.exports = { 
-  app
-
-};
-
+module.exports = { app };

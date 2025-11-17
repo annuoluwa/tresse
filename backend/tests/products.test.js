@@ -11,7 +11,7 @@ const {
   searchProducts
 } = require('../routes/product');
 
-// ------------------- router.param middleware -------------------
+// router.param middleware 
 describe('parameter middleware', () => {
   let req, res, next, middleware;
   const mockProduct = { id: 2, name: 'Hair Straightener' };
@@ -62,7 +62,7 @@ describe('parameter middleware', () => {
   });
 });
 
-// ------------------- categoryHelper -------------------
+// categoryHelper 
 describe('Category Helper function', () => {
   beforeEach(() => { pool.query = jest.fn(); });
 
@@ -88,7 +88,7 @@ describe('Category Helper function', () => {
   });
 });
 
-// ------------------- getAllProducts -------------------
+// getAllProducts 
 describe('GET all products', () => {
   let req, res, next;
   beforeEach(() => {
@@ -119,7 +119,7 @@ describe('GET all products', () => {
   });
 });
 
-// ------------------- getProductsById -------------------
+// getProductsById 
 describe('GET product by ID', () => {
   let req, res, next;
   const mockProduct = { id: 2, productName: 'Curler' };
@@ -170,8 +170,7 @@ describe('GET product by ID', () => {
     expect(next).toHaveBeenCalledWith(error);
   });
 });
-
-// ------------------- getProductByCategory -------------------
+// getProductByCategory 
 describe('GET /products by category', () => {
   let req, res, next;
 
@@ -211,7 +210,7 @@ describe('GET /products by category', () => {
   });
 });
 
-// ------------------- addProduct -------------------
+// addProduct 
 describe('POST addProduct', () => {
   let req, res, next;
   const mockProduct = { id: 1, name: 'Test' };
@@ -249,7 +248,7 @@ describe('POST addProduct', () => {
   });
 });
 
-// ------------------- updateProduct -------------------
+// updateProduct 
 describe('PUT updateProduct', () => {
   let req, res, next;
   const mockProduct = { id: 1, name: 'Updated' };
@@ -297,7 +296,7 @@ describe('PUT updateProduct', () => {
   });
 });
 
-// ------------------- deleteProduct -------------------
+// deleteProduct 
 describe('DELETE deleteProduct', () => {
   let req, res, next;
 
@@ -336,7 +335,7 @@ describe('DELETE deleteProduct', () => {
   });
 });
 
-// ------------------- getBrands -------------------
+// getBrands 
 describe('GET getBrands', () => {
   let req, res, next;
 
@@ -378,7 +377,7 @@ describe('GET getBrands', () => {
   });
 });
 
-// ------------------- searchProducts -------------------
+// searchProducts 
 describe('GET searchProducts', () => {
   let req, res;
 

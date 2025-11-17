@@ -3,15 +3,15 @@ import styles from "./Category.module.css"
 import {FaScissors, FaSpa, FaPumpSoap, FaSprayCan, FaCapsules} from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
-
 const API_URL = process.env.REACT_APP_API_URL;
+
 
 function Category() {
     
   const [categories, setCategories] = useState([]);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Map icons to category names (to display beside fetched data)
   const icons = {
     "Hair Care": <FaScissors />,
     "Skin Care": <FaSpa />,
@@ -26,12 +26,10 @@ function Category() {
         const res = await fetch(`${API_URL}/category/summary`); 
         const data = await res.json();
         setCategories(data);
-        console.log("Fetched categories:", data);
       } catch (err) {
-        console.error("Error fetching categories:", err);
+        setError("Failed to load categories");
       }
     };
-// eslint-disable-next-line
     fetchCategories();
   }, []);
 
@@ -47,7 +45,9 @@ function Category() {
       </div>
 
       <div className={styles.categoryGrid}>
-        {categories.length > 0 ? (
+        {error ? (
+          <p className={styles.error}>{error}</p>
+        ) : categories.length > 0 ? (
           categories.map((cat) => (
             <div 
               key={cat.id} 
@@ -66,5 +66,4 @@ function Category() {
     </section>
   );
 }
-
 export default Category;

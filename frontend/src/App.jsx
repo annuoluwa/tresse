@@ -15,6 +15,7 @@ import UserProfilePage from './pages/usersProfile/UsersProfilePage.jsx';
 import OrderHistoryPage from './pages/orderHistory/OrderHistoryPage.jsx';
 import SignupPage from './pages/signup/SignupPage.jsx';
 import CategoryProductsPage from './pages/categories/CategoryPage.jsx';
+import OAuthSuccess from './pages/oauth/OAuthSuccess.jsx';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const API_URL = process.env.REACT_APP_API_URL;
@@ -39,42 +40,37 @@ function AppInner() {
   
 
   const navigate = useNavigate();
+useEffect(() => {
+  async function fetchCurrentUser() {
+    try {
+      // Skip fetching immediately after OAuth redirect
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('oauth') === 'success') {
+        setLoadingUser(false);
+        return;
+      }
 
-  useEffect(() => {
-    async function fetchCurrentUser() {
-      try {
-        // Ask backend: is there a logged-in user for this session cookie?
-        const userResponse = await fetch(`${API_URL}/users/me`, { credentials: "include" });
-        console.log("Fetch /users/me response:", userResponse.status);
+      const userResponse = await fetch(`${API_URL}/users/me`, {
+        credentials: 'include'
+      });
 
-        if (userResponse.ok) {
-          // Session is valid
-          const userData = await userResponse.json();
-          setCurrentUser(userData);
-          sessionStorage.setItem("currentUser", JSON.stringify(userData));
-
-          // fetch user cart
-          const cartResponse = await fetch(`${API_URL}/cart/${userData.id}`, { credentials: "include" });
-          const cartData = await cartResponse.json();
-          setCartItems(cartData);
-        } else {
-          // No valid session or expired
-          setCurrentUser(null);
-          sessionStorage.removeItem("currentUser");
-          setCartItems([]);
-        }
-      } catch (err) {
-        console.error("Error fetching user or cart:", err);
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        setCurrentUser(userData);
+        sessionStorage.setItem("currentUser", JSON.stringify(userData));
+      } else {
         setCurrentUser(null);
         sessionStorage.removeItem("currentUser");
-        setCartItems([]);
-      } finally {
-        setLoadingUser(false);
       }
+    } catch (err) {
+      setCurrentUser(null);
+      sessionStorage.removeItem("currentUser");
+    } finally {
+      setLoadingUser(false);
     }
-
-    fetchCurrentUser();
-  }, []);
+  }
+  fetchCurrentUser();
+}, []);
 
   //Remove any stale cart data from past sessions
   useEffect(() => {
@@ -87,9 +83,8 @@ function AppInner() {
       setCurrentUser(null);
       setCartItems([]);
       sessionStorage.removeItem("currentUser");
-      console.log("User logged out");
+
     } catch (err) {
-      console.error("Logout failed:", err);
     }
   };
 
@@ -130,9 +125,8 @@ function AppInner() {
         }),
       });
 
-      console.log("Added to user cart:", product);
     } catch (err) {
-      console.error("Failed to add to cart:", err);
+
     }
   };
 
@@ -217,7 +211,17 @@ function AppInner() {
           <Route path="/orders" element={<OrderHistoryPage currentUser={currentUser} />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/category/:name" element={<CategoryProductsPage />} />
-          
+          <Route 
+  path="/oauth-success" 
+  element={
+    <OAuthSuccess 
+      onLogin={(user) => {
+        setCurrentUser(user);
+        sessionStorage.setItem("currentUser", JSON.stringify(user));
+      }} 
+    />
+  } 
+/>
         </Routes>
       </div>
       <Footer />

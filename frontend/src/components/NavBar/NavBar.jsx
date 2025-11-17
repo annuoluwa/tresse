@@ -49,7 +49,7 @@ useEffect(() => {
       const data = await res.json();
       setResults(data);
     } catch (err) {
-      console.error('Search error:', err);
+      setResults([]);
     }
   };
 

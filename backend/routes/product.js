@@ -210,15 +210,14 @@ const result = await pool.query(
   `,
   [brandName]
 );
-    console.log("Direct query result:", result.rows)
+    
 if(result.rows.length === 0) {
   return res.status(404).json({message: "No product for this brand"})
 }
 res.status(200).send(result.rows)
 
   }catch(err){
-console.error(err)
-res.status(500).json({message: "Server error"})
+    next(err);
   }
 }
 
@@ -235,10 +234,8 @@ async function searchProducts(req, res) {
       [`%${searchTerm}%`]
     );
 
-    console.log('Search results for', searchTerm, ':', result.rows.length);
-    res.json(result.rows);
+        res.json(result.rows);
   } catch (err) {
-    console.error('Database search error:', err.message);
     res.status(500).json({ error: 'Database error', details: err.message });
   }
 }

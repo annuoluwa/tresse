@@ -24,7 +24,7 @@ function ProductDetails({ addToCart }) {
           setSelectedVariantId(data.variants[0].id);
         }
       } catch (err) {
-        console.error(err);
+
       } finally {
         setLoading(false);
       }

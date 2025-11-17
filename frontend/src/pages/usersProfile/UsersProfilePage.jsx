@@ -22,7 +22,7 @@ const UserProfilePage = ({ currentUser }) => {
         setUser(data);
         setFormData({ name: data.name, email: data.email });
       } catch (err) {
-        console.error(err);
+
       } finally {
         setLoading(false);
       }
@@ -49,7 +49,6 @@ const UserProfilePage = ({ currentUser }) => {
       setUser(updated);
       setEditing(false);
     } catch (err) {
-      console.error(err);
       alert("Error updating profile");
     }
   };

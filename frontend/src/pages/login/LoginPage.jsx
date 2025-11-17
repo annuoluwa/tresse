@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './LoginPage.module.css';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -9,38 +9,55 @@ function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+// Fetch current user on load, including after OAuth redirect
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const oauthSuccess = urlParams.get('oauth') === 'success';
+
+  // fetching /users/me if OAuth redirect or page reload
+  fetch(`${API_URL}/users/me`, {
+    credentials: 'include'
+  })
+    .then(res => {
+      return res.json();
+    })
+    .then(data => {
+      // data should be the user object directly, not data.user
+      if (data && data.id) {
+        onLogin(data);
+        navigate('/');
+      }
+    })
+    .catch(err => {});
+}, [onLogin, navigate]);
+
   const handleLogin = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    try {
+      const response = await fetch(`${API_URL}/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include'
+      });
 
-  try {
-    const response = await fetch(`${API_URL}/users/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-      credentials: "include", // important for sessions/cookies
-    });
+      const data = await response.json();
 
-    const data = await response.json();
-    console.log("Response status:", response.status);
-    console.log("Response data:", data);
+      if (!response.ok) return alert(data.message || "Login failed");
 
-    if (!response.ok) {
-      alert(data.message || "Invalid credentials");
-      return;
+      // Changed: pass data directly, not data.user
+      onLogin(data);
+      sessionStorage.setItem("currentUser", JSON.stringify(data));
+      navigate('/');
+    } catch (err) {
+      alert("Something went wrong");
     }
+  };
 
-    // Save user to App state and sessionStorage
-    onLogin(data.user); // update React state
-    sessionStorage.removeItem("cartItems");
-    sessionStorage.setItem("currentUser", JSON.stringify(data.user)); // persist session
-
-    // Redirect only after session is saved
-    navigate("/");
-  } catch (err) {
-    console.error("Login error:", err);
-    alert("Something went wrong. Please try again.");
-  }
-};
+  const handleGoogleLogin = () => {
+    // Redirect to backend Google OAuth
+    window.location.href = `${API_URL}/auth/google`;
+  };
 
   return (
     <div className={styles.LoginContainer}>
@@ -73,8 +90,6 @@ function Login({ onLogin }) {
         </form>
       </div>
 
-      <button type="button">Continue as Guest</button>
-
       <p>
         Don't have an account?{" "}
         <Link to="/signup" className={styles.signupLink}>
@@ -84,10 +99,8 @@ function Login({ onLogin }) {
 
       <p>Or continue with</p>
 
-      <div className={styles.oAuth}><button onClick={() => window.location.href = 'https://tresse.onrender.com/auth/google'}>
-  Google
-</button>
-        {/*<button>Facebook</button>*/}
+      <div className={styles.oAuth}>
+        <button onClick={handleGoogleLogin}>Google</button>
       </div>
     </div>
   );

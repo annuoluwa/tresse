@@ -5,7 +5,7 @@ const Stripe = require('stripe');
 const  isLoggedIn  = require('../middleware/isLoggedIn');
 const stripe = Stripe(process.env.STRIPE_SK);
 
-// ----------------------- ADD TO CART -----------------------
+//  ADD TO CART 
 async function addToCart(req, res, next) {
   const userId = parseInt(req.params.userId, 10);
   const { productId, variantId, quantity = 1 } = req.body;
@@ -44,7 +44,7 @@ async function addToCart(req, res, next) {
   }
 }
 
-// ----------------------- UPDATE QUANTITY -----------------------
+//  UPDATE QUANTITY 
 async function updateQuantity(req, res, next) {
   try {
     let { userId, productId, variantId } = req.params;
@@ -73,7 +73,7 @@ async function updateQuantity(req, res, next) {
   }
 }
 
-// ----------------------- GET CART ITEMS -----------------------
+//  GET CART ITEMS 
 async function usersItemsInCartById(req, res, next) {
   try {
     let { userId } = req.params;
@@ -95,7 +95,7 @@ async function usersItemsInCartById(req, res, next) {
   }
 }
 
-// ----------------------- DELETE CART ITEMS -----------------------
+//  DELETE CART ITEMS 
 async function deleteCartbyUsersId(req, res, next) {
   try {
     let { userId } = req.params;
@@ -115,7 +115,7 @@ async function deleteCartbyUsersId(req, res, next) {
 
 
 
-// ----------------------- CHECKOUT -----------------------
+//  CHECKOUT 
 async function checkout(req, res, next) {
   const userId = parseInt(req.params.userId, 10);
   const { shippingCost = 5 } = req.body;
@@ -179,7 +179,7 @@ async function checkout(req, res, next) {
 
 
 
-// ----------------------- ROUTES -----------------------
+//  ROUTES 
 cartRouter.post("/:userId", async (req, res, next) => {
   req.body.userId = req.params.userId;
   await addToCart(req, res, next);
@@ -189,7 +189,7 @@ cartRouter.delete('/:userId', deleteCartbyUsersId);
 cartRouter.put('/:userId/:productId/:variantId', updateQuantity);
 cartRouter.post('/:userId/checkout', checkout);
 
-// ----------------------- EXPORT -----------------------
+//  EXPORT 
 module.exports = {
   cartRouter,
   addToCart,

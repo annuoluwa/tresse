@@ -99,7 +99,6 @@ const tax = Number.isFinite(subtotal) ? subtotal * TAX_RATE : 0;
 const shipping = Number.isFinite(subtotal) ? (subtotal > 50 ? 0 : SHIPPING_FLAT) : 0;
 const total = subtotal + tax + shipping;
 
-console.log("CartPage items:", cartItems);
 
   if (cartItems.length === 0) {
     return (

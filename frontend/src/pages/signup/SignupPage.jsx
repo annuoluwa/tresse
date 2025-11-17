@@ -1,4 +1,4 @@
-import react, { useState } from "react";
+import React, { useState } from "react";
 import styles from "./SignupPage.module.css";
 import { useNavigate } from "react-router-dom";
 
@@ -42,7 +42,6 @@ try {
         setTimeout(() => navigate("/login"), 2000);
     }
 } catch (err) {
-    console.error(err);
     setError("Something went wrong. Please try again.")
 } finally {
     setLoading(false); 

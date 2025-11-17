@@ -7,7 +7,7 @@ import styles from "./CheckoutPage.module.css";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-// --------- Checkout Form ---------
+//  Checkout Form 
 const CheckoutForm = ({
   cartItems,
   setCartItems,
@@ -60,7 +60,7 @@ const CheckoutForm = ({
 
       setClientSecret(data.clientSecret); 
     } catch (err) {
-      console.error(err);
+       setError(err.message || "Failed to process order");
       alert(err.message);
     } finally {
       setLoading(false);
@@ -91,7 +91,6 @@ const handlePayment = async () => {
 
     // Clear global cart
     setCartItems([]);
-    console.log(" Cart cleared");
 
     //  Flag order completed
     setOrderCompleted(true);
@@ -104,7 +103,6 @@ const handlePayment = async () => {
     }, 1500);
 
   } catch (err) {
-    console.error(err);
     setError(err.message || "Something went wrong during payment.");
   } finally {
     setLoading(false);
@@ -175,7 +173,7 @@ return (
   );
 };
 
-// --------- Wrapper ---------
+//  Wrapper 
 const CheckoutPageWrapper = ({
   currentUser,
   cartItems,
@@ -206,7 +204,7 @@ const CheckoutPageWrapper = ({
         if (!res.ok) throw new Error(data.error || "Failed to fetch cart");
         setCartItems(data);
       } catch (err) {
-        console.error(err);
+        alert("Unable to load cart. Please refresh the page.");
       } finally {
         setLoading(false);
       }

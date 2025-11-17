@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const express = require('express');
+const path = require('path');
 const Stripe = require('stripe');
 const morgan = require('morgan');
 const errorHandler = require('errorhandler');
@@ -16,7 +17,7 @@ const cors = require('cors');
 const PORT = process.env.PORT || 9000;
 const app = express();
 
-//CORS
+//CORS - only needed for local dev now
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
@@ -32,16 +33,14 @@ app.use(session({
   store: new pgSession({ pool, tableName: 'session', createTableIfMissing: true }),
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined,
+    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax', // Changed from 'none'
     maxAge: 1000 * 60 * 60
   }
 }));
-
 
 //Passport
 app.use(passport.initialize());
@@ -67,19 +66,18 @@ app.get('/auth/google/callback',
       req.session.save((err) => {
         if (err) {
           console.error("Session save error:", err);
-          return res.redirect(`${process.env.CORS_ORIGIN}/login?error=session_failed`);
+          return res.redirect('/login?error=session_failed');
         }
-        res.redirect(`${process.env.CORS_ORIGIN}/oauth-success`);
+        res.redirect('/oauth-success');
       });
     } catch (err) {
       console.error("OAuth callback error:", err);
-      res.redirect(`${process.env.CORS_ORIGIN}/login?error=oauth_failed`);
+      res.redirect('/login?error=oauth_failed');
     }
   }
 );
 
-
-//API Routes
+//API Routes (with /api prefix)
 const { productRouter } = require('./backend/routes/product');
 const { usersRouter } = require('./backend/routes/users');
 const { cartRouter } = require('./backend/routes/cart');
@@ -87,15 +85,26 @@ const { orderRouter } = require('./backend/routes/order');
 const { categoryRouter } = require('./backend/routes/category');
 const { newsletterRouter } = require('./backend/routes/newsLetterRouter');
 
-app.use('/products', productRouter);
-app.use('/users', usersRouter);
-app.use('/cart', cartRouter);
-app.use('/order', orderRouter);
-app.use('/category', categoryRouter);
-app.use('/newsletter', newsletterRouter);
+app.use('/api/products', productRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/cart', cartRouter);
+app.use('/api/order', orderRouter);
+app.use('/api/category', categoryRouter);
+app.use('/api/newsletter', newsletterRouter);
+
+// Serve React frontend in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'frontend/build')));
+  
+  // Handle React routing - return index.html for all non-API routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+  });
+}
 
 if (process.env.NODE_ENV === 'development') {
   app.use(errorHandler());
+  app.get('/', (req, res) => res.send('Server is running!'));
 }
 
 app.use((err, req, res, next) => {
@@ -105,8 +114,6 @@ app.use((err, req, res, next) => {
     stack: err.stack
   });
 });
-
-app.get('/', (req, res) => res.send('Server is running!'));
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

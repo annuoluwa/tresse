@@ -28,8 +28,11 @@ export default function OAuthSuccessPage({ onLogin }) {
     fetchUser();
   }, [navigate, onLogin]);
 
-  <div className={styles.loadingContainer}>
+  return (
+    <div className={styles.loadingContainer}>
       <div className={styles.spinner}></div>
       <p>Logging you in...</p>
     </div>
+  )
+    
 }

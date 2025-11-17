@@ -56,7 +56,7 @@ useEffect(() => {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth
-    window.location.href = `${API_URL}/auth/google`;
+    window.location.href = '/auth/google';
   };
 
   return (

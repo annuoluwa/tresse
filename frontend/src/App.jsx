@@ -15,7 +15,7 @@ import UserProfilePage from './pages/usersProfile/UsersProfilePage.jsx';
 import OrderHistoryPage from './pages/orderHistory/OrderHistoryPage.jsx';
 import SignupPage from './pages/signup/SignupPage.jsx';
 import CategoryProductsPage from './pages/categories/CategoryPage.jsx';
-import OAuthSuccess from './pages/oauth/OAuthSuccess.jsx';
+import OAuthSuccessPage from './pages/oauth/OAuthSuccess.jsx';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const API_URL = process.env.REACT_APP_API_URL;
@@ -214,7 +214,7 @@ useEffect(() => {
           <Route 
   path="/oauth-success" 
   element={
-    <OAuthSuccess 
+    <OAuthSuccessPage
       onLogin={(user) => {
         setCurrentUser(user);
         sessionStorage.setItem("currentUser", JSON.stringify(user));

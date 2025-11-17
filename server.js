@@ -1,10 +1,7 @@
-const dotenv = require('dotenv');
-const path = require('path');
-dotenv.config({
-  path: process.env.NODE_ENV === 'production'
-    ? path.resolve(__dirname, '.env.production')
-    : path.resolve(__dirname, 'backend', '.env')
-});
+// Load .env only in development
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config({ path: './backend/.env' });
+}
 
 const express = require('express');
 const Stripe = require('stripe');
@@ -19,7 +16,6 @@ const cors = require('cors');
 const PORT = process.env.PORT || 9000;
 const app = express();
 
-
 //CORS
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
@@ -30,7 +26,6 @@ app.use(cors({
 app.use(express.json());
 const stripe = Stripe(process.env.STRIPE_SK);
 app.use(morgan('dev'));
-
 
 //Session
 app.use(session({
@@ -46,6 +41,7 @@ app.use(session({
     maxAge: 1000 * 60 * 60
   }
 }));
+
 
 //Passport
 app.use(passport.initialize());

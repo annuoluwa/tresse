@@ -62,7 +62,9 @@ passport.use(
 
 // Serialize user for session
 passport.serializeUser((user, done) => {
+  console.log("Serializing user:", user.id);
   done(null, user.id); // store DB primary key (id) in session
+  
 });
 
 // Deserialize user from session

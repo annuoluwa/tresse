@@ -60,6 +60,10 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/login', session: true }),
   async (req, res, next) => {
     try {
+      console.log("User authenticated:", req.user?.id);
+      console.log("Session ID:", req.sessionID);
+      console.log("Is authenticated?", req.isAuthenticated());
+      
       req.session.save((err) => {
         if (err) {
           console.error("Session save error:", err);

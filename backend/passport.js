@@ -31,25 +31,34 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, passwor
 }));
 
 // Google OAuth strategy
-passport.use(new GoogleStrategy({
-  clientID: process.env.CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: process.env.NODE_ENV === 'production'
-    ? 'https://tresse.onrender.com/auth/google/callback'
-    : 'http://localhost:9000/auth/google/callback'
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    // Find or create user in DB using Google profile info
-    let user = await Users.findByGoogleId(profile.id);
-    if (!user) {
-      // use profile.displayName and profile.emails[0].value
-      user = await Users.createFromGoogle(profile);
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        console.log("Google Profile:", profile.id, profile.emails[0].value);
+        
+        let user = await Users.findByGoogleId(profile.id);
+        console.log("Found existing user:", user ? user.id : "none");
+
+        if (!user) {
+          console.log("Creating new user from Google profile");
+          user = await Users.createFromGoogle(profile);
+          console.log("New user created:", user.id);
+        }
+
+        return done(null, user);
+      } catch (err) {
+        console.error("Google Strategy Error:", err.message);
+        return done(err, null);
+      }
     }
-    return done(null, user); // Pass DB user, not the Google profile
-  } catch (err) {
-    return done(err);
-  }
-}));
+  )
+);
 
 // Serialize user for session
 passport.serializeUser((user, done) => {

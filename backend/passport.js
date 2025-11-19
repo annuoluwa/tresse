@@ -12,19 +12,13 @@ passport.use(new GoogleStrategy({
     console.log("Profile ID:", profile.id);
     console.log("Email:", profile.emails[0]?.value);
     
-    const email = profile.emails[0]?.value;
     const googleId = profile.id;
     
-    let user = await Users.getUserByGoogleId(googleId);
+    let user = await Users.findByGoogleId(googleId);
     
     if (!user) {
       console.log("User not found, creating new user");
-      user = await Users.createUser({
-        email,
-        google_id: googleId,
-        first_name: profile.name?.givenName || '',
-        last_name: profile.name?.familyName || ''
-      });
+      user = await Users.createFromGoogle(profile);
       console.log("New user created:", user.id);
     } else {
       console.log("Existing user found:", user.id);
@@ -49,7 +43,7 @@ passport.deserializeUser(async (id, done) => {
   console.log("User ID to deserialize:", id);
   
   try {
-    const user = await Users.getUserById(id);
+    const user = await Users.findById(id);
     console.log("Deserialized user:", user?.id);
     done(null, user);
   } catch (err) {

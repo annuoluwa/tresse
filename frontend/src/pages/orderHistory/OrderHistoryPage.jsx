@@ -1,55 +1,128 @@
 import React, { useEffect, useState } from "react";
-import styles from './OrderHistoryPage.module.css'
+import styles from './OrderHistoryPage.module.css';
 
-function OrderHistoryPage({currentUser}) {
+const API_URL = process.env.REACT_APP_API_URL;
 
-    const [orderHistory, setOrderHistory] = useState([]);
-    const [loading, setLoading] = useState(true)
-    const API_URL = process.env.REACT_APP_API_URL
+function OrderHistoryPage({ currentUser }) {
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        
-    if(!currentUser) return;
-        async function fetchOrders() {
-            
-    try {
-    const response= await fetch(`${API_URL}/order/${currentUser.id}`, {
-        credentials: "include"
-    })
-    
-    const data = await response.json();
-    setOrderHistory(data);
-    
-
-    }catch (err) {
-
-    }finally {
-        setLoading(false)
+  useEffect(() => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
     }
 
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(`${API_URL}/order/user/${currentUser.id}`, {
+          credentials: "include"
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders");
         }
-        fetchOrders()
-          }, [currentUser])
 
-    if (!currentUser) return <p className={styles.empty}>Please login to view order history</p>;
-    if (loading) return <p className={styles.loading}>Loading orders...</p>;
-    
+        const data = await response.json();
+        setOrderHistory(data);
+      } catch (err) {
+        setError(err.message || "Failed to load orders");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return(
-        < div className={styles.orderHistoryContainer}>
-            {orderHistory.length === 0 && <h3>YOU have no recent order</h3>}
+    fetchOrders();
+  }, [currentUser]);
 
-            {orderHistory.length >= 1 && orderHistory.map((order) => (
-                <div key={order.id} className={styles.orderHistory}>
-                    <p>Date: {order.order_date} </p>
-                    <p>Total: {order.total_price}</p>
-                    <p>Status: {order.status}</p>
-                </div>
-            ))}
-            
+  if (!currentUser) {
+    return (
+      <div className={styles.orderHistoryContainer}>
+        <p className={styles.empty}>Please log in to view order history</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className={styles.orderHistoryContainer}>
+        <p className={styles.loading}>Loading orders...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.orderHistoryContainer}>
+        <p className={styles.error}>Error: {error}</p>
+      </div>
+    );
+  }
+
+  if (orderHistory.length === 0) {
+    return (
+      <div className={styles.orderHistoryContainer}>
+        <h3 className={styles.empty}>You have no recent orders</h3>
+      </div>
+    );
+  }
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const getStatusClass = (status) => {
+    return status === 'paid' ? styles.statusPaid : styles.statusPending;
+  };
+
+  return (
+    <div className={styles.orderHistoryContainer}>
+      <h2 className={styles.title}>Order History</h2>
+
+      {orderHistory.map((order) => (
+        <div key={order.order_id} className={styles.orderCard}>
+          <div className={styles.orderHeader}>
+            <p className={styles.orderId}>Order #{order.order_id}</p>
+            <p className={styles.orderDate}>{formatDate(order.order_date)}</p>
+          </div>
+
+          <div className={styles.orderDetails}>
+            <div className={styles.detailRow}>
+              <span>Total:</span>
+              <span className={styles.total}>£{Number(order.total_price).toFixed(2)}</span>
+            </div>
+            <div className={styles.detailRow}>
+              <span>Status:</span>
+              <span className={getStatusClass(order.status)}>
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </span>
+            </div>
+          </div>
+
+          {order.items && order.items.length > 0 && (
+            <div className={styles.orderItems}>
+              <h4>Items ({order.items.length})</h4>
+              <ul>
+                {order.items.map((item) => (
+                  <li key={item.order_item_id} className={styles.orderItem}>
+                    <span>Product ID: {item.product_id}</span>
+                    <span>Qty: {item.quantity}</span>
+                    <span>£{Number(item.unit_price).toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-
-)
+      ))}
+    </div>
+  );
 }
 
 export default OrderHistoryPage;

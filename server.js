@@ -17,11 +17,16 @@ const cors = require('cors');
 const PORT = process.env.PORT || 9000;
 const app = express();
 
+// Trust proxy - CRITICAL for Render
+app.set('trust proxy', 1);
+
 //CORS - only needed for local dev now
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true
-}));
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+  }));
+}
 
 //Body parser
 app.use(express.json());
@@ -37,20 +42,32 @@ app.use(session({
   }),
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false, // This prevents empty sessions
+  saveUninitialized: false,
+  name: 'connect.sid',
+  proxy: true, // Important with trust proxy
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Back to 'none'
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     path: '/',
     maxAge: 1000 * 60 * 60
   }
 }));
 
-// Debug middleware - add this right after session
+// Debug middleware
 app.use((req, res, next) => {
+  console.log('=== Request Debug ===');
   console.log('Session ID:', req.sessionID);
-  console.log('Session:', req.session);
+  console.log('User:', req.user?.id);
+  console.log('Cookie header:', req.headers.cookie);
+  
+  // Log response Set-Cookie header
+  const oldSend = res.send;
+  res.send = function(data) {
+    console.log('Set-Cookie:', res.getHeader('Set-Cookie'));
+    oldSend.apply(res, arguments);
+  };
+  
   next();
 });
 

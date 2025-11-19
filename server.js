@@ -54,14 +54,18 @@ app.use(session({
   }
 }));
 
-// Debug middleware
+//Passport initialization
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Debug middleware - MOVED AFTER PASSPORT
 app.use((req, res, next) => {
   console.log('=== Request Debug ===');
   console.log('Session ID:', req.sessionID);
-  console.log('User:', req.user?.id);
+  console.log('User ID:', req.user?.id); // Changed to show user.id
+  console.log('Is Authenticated:', req.isAuthenticated());
   console.log('Cookie header:', req.headers.cookie);
   
-  // Log response Set-Cookie header
   const oldSend = res.send;
   res.send = function(data) {
     console.log('Set-Cookie:', res.getHeader('Set-Cookie'));
@@ -70,10 +74,6 @@ app.use((req, res, next) => {
   
   next();
 });
-
-//Passport
-app.use(passport.initialize());
-app.use(passport.session());
 
 //OAuth routes
 app.get('/auth/google',

@@ -8,31 +8,27 @@ function Login({ onLogin }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-// Fetch current user on load, including after OAuth redirect
-useEffect(() => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const oauthSuccess = urlParams.get('oauth') === 'success';
-
-  // fetching /users/me if OAuth redirect or page reload
-  fetch(`${API_URL}/users/me`, {
-    credentials: 'include'
-  })
-    .then(res => {
-      return res.json();
+  // Check if user is already authenticated
+  useEffect(() => {
+    fetch(`${API_URL}/users/me`, {
+      credentials: 'include'
     })
-    .then(data => {
-      // data should be the user object directly, not data.user
-      if (data && data.id) {
-        onLogin(data);
-        navigate('/');
-      }
-    })
-    .catch(err => {});
-}, [onLogin, navigate]);
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.id) {
+          onLogin(data);
+          navigate('/');
+        }
+      })
+      .catch(() => {}); // Silent fail - user not logged in
+  }, [onLogin, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
       const response = await fetch(`${API_URL}/users/login`, {
         method: 'POST',
@@ -43,19 +39,21 @@ useEffect(() => {
 
       const data = await response.json();
 
-      if (!response.ok) return alert(data.message || "Login failed");
+      if (!response.ok) {
+        alert(data.message || "Login failed");
+        return;
+      }
 
-      // Changed: pass data directly, not data.user
       onLogin(data);
-      sessionStorage.setItem("currentUser", JSON.stringify(data));
       navigate('/');
     } catch (err) {
       alert("Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    // Redirect to backend Google OAuth
     window.location.href = '/auth/google';
   };
 
@@ -70,10 +68,11 @@ useEffect(() => {
         <form onSubmit={handleLogin}>
           <label>Email Address:</label>
           <input
-            type="text"
+            type="email"
             placeholder="Enter email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
 
           <label>Password:</label>
@@ -82,11 +81,14 @@ useEffect(() => {
             placeholder="Enter Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
 
           <p className={styles.forgotPassword}>Forgot password?</p>
 
-          <button type="submit">Sign in</button>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
         </form>
       </div>
 

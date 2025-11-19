@@ -1,9 +1,9 @@
 :root {
   --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
   --gradient-soft: linear-gradient(90deg, #FBC2EB, #6f9ae6);
-  --accent-rose: #ddb3b9; /* rose gold */
-  --accent-blush: #f8b9c4; /* blush pink */
-  --accent-silver: #c0c0c0; /* muted silver */
+  --accent-rose: #ddb3b9;
+  --accent-blush: #f8b9c4;
+  --accent-silver: #c0c0c0;
 }
 
 html, body {
@@ -11,7 +11,6 @@ html, body {
   overflow-x: auto; 
 }
 
-/* NavBar container */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -27,8 +26,6 @@ html, body {
   transition: all 0.3s ease;
 }
 
-
-/* Brand name / logo */
 .navbar button, a {
   background: none;
   border: none;
@@ -40,8 +37,6 @@ html, body {
   text-decoration: none;
 }
 
-
-
 .navbar button:hover {
   color: var(--accent-rose);
   transform: scale(1.1);
@@ -52,7 +47,6 @@ html, body {
   transform: scale(1.1);
 }
 
-/* Center navigation links */
 .navLinks {
   display: flex;
   gap: 2rem;
@@ -70,8 +64,6 @@ html, body {
   text-decoration: none;
 }
 
-
-
 .navLinks a::after {
   content: '';
   position: absolute;
@@ -87,14 +79,12 @@ html, body {
   width: 100%;
 }
 
-/* Right actions (search, icons, etc.) */
 .actions {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-/* Search input */
 .searchInput {
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
@@ -112,7 +102,6 @@ html, body {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Buttons beside search */
 .actions button, a {
   background: none;
   border: none;
@@ -125,7 +114,6 @@ html, body {
   color: var(--accent-blush);
 }
 
-/* Icons */
 .iconButton {
   font-size: 1.3rem;
   display: flex;
@@ -139,7 +127,6 @@ html, body {
   color: var(--accent-rose);
 }
 
-/* Cart count badge */
 .cartCount {
   background: var(--gradient-soft);
   color: #0F2027;
@@ -152,7 +139,6 @@ html, body {
   right: -8px;
 }
 
-/* Greeting text */
 .user {
   color: var(--accent-blush);
   font-weight: 500;
@@ -171,35 +157,35 @@ html, body {
 }
 
 .search:hover {
-  
   color: white;
 }
 
 h4, .logo {
-    display: inline-flex;
-    margin-inline-start: 0.3rem;
-  
-    
+  display: inline-flex;
+  margin-inline-start: 0.3rem;
 }
 
-h4{
-    position: relative;
-    bottom: 0.6rem;
-    margin: 0
+h4 {
+  position: relative;
+  bottom: 0.6rem;
+  margin: 0;
 }
 
+.logo {
+  border: 2px solid #FBC2EB;
+  border-radius: 50%;
+  padding: 0.3rem;
+  position: relative;
+  bottom: 0.1rem;
+  background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  color: yellow;
+  font-size: 1.9rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
 
-
-.logo{
-border: 2px solid #FBC2EB,;
-border-radius: 50%;
-padding: 0.3rem;
-position: relative;
-bottom: 0.1rem;
-background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
-color: yellow;
-font-size: 1.9rem;
-
+.logo:hover {
+  transform: rotate(15deg) scale(1.1);
 }
 
 .searchWrapper {
@@ -208,7 +194,7 @@ font-size: 1.9rem;
 
 .searchDropdown {
   position: absolute;
-  top: 100%;             
+  top: 100%;
   left: 0;
   width: 100%;
   background: var(--accent-silver);
@@ -216,7 +202,7 @@ font-size: 1.9rem;
   border-radius: 4px;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 1000;         
+  z-index: 1000;
   padding: 0;
   margin: 0;
   list-style: none;
@@ -228,11 +214,11 @@ font-size: 1.9rem;
 }
 
 .searchDropdown li:hover {
-  background-color: var(--accent-rose)
+  background-color: var(--accent-rose);
 }
 
 .hamburger {
-  display: none; /* hidden on desktop */
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   width: 24px;
@@ -240,7 +226,7 @@ font-size: 1.9rem;
   background: none;
   border: none;
   cursor: pointer;
-  z-index: 1100; /* above navbar */
+  z-index: 1100;
 }
 
 .bar {
@@ -251,27 +237,25 @@ font-size: 1.9rem;
   transition: all 0.3s ease;
 }
 
-/* ---------- MOBILE MENU ---------- */
 .mobileMenu {
-  display: flex;               /* flex column for list layout */
+  display: flex;
   flex-direction: column;
   position: absolute;
-  top: 100%;                   /* below navbar */
+  top: 100%;
   left: 0;
   width: 100%;
-  background: rgba(2, 31, 43, 0.85); /* semi-transparent overlay */
-  backdrop-filter: blur(6px);  /* blur background for readability */
-  padding: 1rem 0;             /* vertical padding */
-  gap: 1rem;                   /* spacing between links */
+  background: rgba(2, 31, 43, 0.85);
+  backdrop-filter: blur(6px);
+  padding: 1rem 0;
+  gap: 1rem;
   text-align: center;
   z-index: 1050;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* subtle shadow */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
-  max-height: 500px;           /* ensure smooth rendering */
+  max-height: 500px;
   overflow: hidden;
 }
 
-/* Links inside the mobile dropdown */
 .mobileMenu a {
   color: white;
   font-size: 1rem;
@@ -283,21 +267,20 @@ font-size: 1.9rem;
 }
 
 .mobileMenu a:hover {
-  background: rgba(255, 255, 255, 0.15); /* subtle hover */
+  background: rgba(255, 255, 255, 0.15);
   color: var(--accent-blush);
 }
 
-/* Mobile search wrapper */
 .searchWrapperMobile {
   display: flex;
-  flex-direction: row; /* row so icon is beside input */
+  flex-direction: row;
   align-items: center;
   gap: 0.5rem;
   padding: 0 15rem;
 }
 
 .searchWrapperMobile input {
-  flex: 1; /* input takes full width minus icon */
+  flex: 1;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -322,7 +305,6 @@ font-size: 1.9rem;
   background-color: var(--accent-rose);
 }
 
-/* ---------- BREAKPOINTS ---------- */
 @media (max-width: 864px) {
   .navLinks {
     display: none;
@@ -335,25 +317,78 @@ font-size: 1.9rem;
   .hamburger {
     display: flex;
   }
+
+  .logo {
+    font-size: 1.4rem;
+    padding: 0.2rem;
+  }
+
+  h4 {
+    font-size: 1.2rem;
+    bottom: 0.4rem;
+  }
+
+  .iconButton {
+    font-size: 1.1rem;
+  }
+
+  .mobileMenu {
+    gap: 0.5rem;
+    padding: 1.5rem 0;
+  }
+
+  .mobileMenu a {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .searchWrapperMobile {
+    padding: 0 1rem;
+    margin: 0.5rem 0;
+  }
 }
 
 @media (max-width: 480px) {
+  .logo {
+    font-size: 1.2rem;
+    padding: 0.15rem;
+  }
+
+  h4 {
+    font-size: 1rem;
+    bottom: 0.3rem;
+  }
+
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
 
   .searchWrapperMobile {
- margin-left: 2rem;
-  padding: 0 3rem;
-  
-}
+    margin-left: 2rem;
+    padding: 0 3rem;
+  }
+
+  .mobileMenu {
+    gap: 0.3rem;
+    padding: 1rem 0;
+  }
 
   .mobileMenu a {
     font-size: 0.95rem;
+    padding: 0.8rem 1rem;
   }
 
   .searchWrapperMobile input {
     width: 100%;
+    font-size: 0.9rem;
   }
 
   .actions .iconButton {
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+
+  .cartCount {
+    font-size: 0.6rem;
+    padding: 1px 4px;
   }
 }

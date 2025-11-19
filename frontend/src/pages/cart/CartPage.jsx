@@ -5,16 +5,18 @@ import { useNavigate } from "react-router-dom";
 
 const API_URL = process.env.REACT_APP_API_URL;
 const TAX_RATE = 0.1; // 10% tax
-const SHIPPING_FLAT = 5; // flat $5 shipping
+const SHIPPING_FLAT = 5; // $5 flat shipping
+const FREE_SHIPPING_THRESHOLD = 50;
 
 function CartPage({ cartItems, setCartItems, userId }) {
   const navigate = useNavigate();
 
-  // Remove a single unit from cart
+  // Decrease quantity by 1
   const decreaseQuantity = async (productId, variantId) => {
     const existingItem = cartItems.find(
       (item) => item.id === productId && item.selectedVariant?.id === variantId
     );
+    
     if (!existingItem) return;
 
     if (existingItem.quantity > 1) {
@@ -24,27 +26,17 @@ function CartPage({ cartItems, setCartItems, userId }) {
           : item
       );
       setCartItems(updatedCart);
-
-      if (userId) {
-        await fetch(`${API_URL}/cart/${userId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ product: existingItem }),
-        });
-      } else {
-        localStorage.setItem("guestCart", JSON.stringify(updatedCart));
-      }
+      await updateCart(updatedCart, existingItem);
     } else {
       removeFromCart(productId, variantId);
     }
   };
 
-  // Increase quantity
+  // Increase quantity by 1
   const increaseQuantity = async (product) => {
     const variant = product.selectedVariant;
     const existingIndex = cartItems.findIndex(
-      (item) => item.id === product.id && item.selectedVariant?.id === variant.id
+      (item) => item.id === product.id && item.selectedVariant?.id === variant?.id
     );
 
     let updatedCart;
@@ -56,50 +48,58 @@ function CartPage({ cartItems, setCartItems, userId }) {
     }
 
     setCartItems(updatedCart);
-
-    if (userId) {
-      await fetch(`${API_URL}/cart/${userId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ product }),
-      });
-    } else {
-      localStorage.setItem("guestCart", JSON.stringify(updatedCart));
-    }
+    await updateCart(updatedCart, product);
   };
 
-  // Remove item completely
+  // Remove item from cart
   const removeFromCart = async (productId, variantId) => {
     const updatedCart = cartItems.filter(
-      (item) => item.id !== productId || item.selectedVariant?.id !== variantId
+      (item) => !(item.id === productId && item.selectedVariant?.id === variantId)
     );
     setCartItems(updatedCart);
 
     if (userId) {
-      await fetch(`${API_URL}/cart/${userId}/${productId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      try {
+        await fetch(`${API_URL}/cart/${userId}/${productId}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+      } catch (err) {
+        console.error('Failed to remove item:', err);
+      }
     } else {
       localStorage.setItem("guestCart", JSON.stringify(updatedCart));
     }
   };
 
-  // Calculate summary values- using a fallback check so that my calcuation always return a valid no before calling .toFixed()
-  const subtotal = Array.isArray(cartItems)
-  ? cartItems.reduce(
-      (sum, item) =>
-        sum + ((item.selectedVariant?.price || 0) * (item.quantity || 0)),
-      0
-    )
-  : 0;
+  // Update cart (backend or localStorage)
+  const updateCart = async (updatedCart, product) => {
+    if (userId) {
+      try {
+        await fetch(`${API_URL}/cart/${userId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ product }),
+        });
+      } catch (err) {
+        console.error('Failed to update cart:', err);
+      }
+    } else {
+      localStorage.setItem("guestCart", JSON.stringify(updatedCart));
+    }
+  };
 
-const tax = Number.isFinite(subtotal) ? subtotal * TAX_RATE : 0;
-const shipping = Number.isFinite(subtotal) ? (subtotal > 50 ? 0 : SHIPPING_FLAT) : 0;
-const total = subtotal + tax + shipping;
+  // Calculate totals
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + (item.selectedVariant?.price || 0) * (item.quantity || 0),
+    0
+  );
+  const tax = subtotal * TAX_RATE;
+  const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT;
+  const total = subtotal + tax + shipping;
 
-
+  // Empty cart state
   if (cartItems.length === 0) {
     return (
       <div className={styles.cartPage}>
@@ -120,32 +120,45 @@ const total = subtotal + tax + shipping;
         </div>
       </div>
     );
-    
   }
 
   return (
     <div className={styles.cartPage}>
       <h2 className={styles.cartTitle}>Your Cart</h2>
       <div className={styles.cartContent}>
-        {/* Left column: Cart Items */}
+        {/* Cart Items */}
         <ul className={styles.cartList}>
           {cartItems.map((item) => (
             <li
-              key={item.id + (item.selectedVariant?.id || 0)}
+              key={`${item.id}-${item.selectedVariant?.id || 0}`}
               className={styles.cartItem}
             >
-              <img src={item.imageUrl} alt={item.name} className={styles.cartImage} />
+              <img 
+                src={item.imageUrl} 
+                alt={item.name} 
+                className={styles.cartImage} 
+              />
               <div className={styles.itemDetails}>
                 <span className={styles.itemName}>{item.name}</span>
-               <span className={styles.itemVariant}>
-  {item.selectedVariant
-    ? `${item.selectedVariant.variant_type}: ${item.selectedVariant.variant_value}`
-    : "N/A"}
-</span>
+                <span className={styles.itemVariant}>
+                  {item.selectedVariant
+                    ? `${item.selectedVariant.variant_type}: ${item.selectedVariant.variant_value}`
+                    : "Standard"}
+                </span>
                 <div className={styles.itemQuantityControls}>
-                  <button onClick={() => decreaseQuantity(item.id, item.selectedVariant?.id)}>-</button>
+                  <button 
+                    onClick={() => decreaseQuantity(item.id, item.selectedVariant?.id)}
+                    aria-label="Decrease quantity"
+                  >
+                    -
+                  </button>
                   <span>{item.quantity}</span>
-                  <button onClick={() => increaseQuantity(item)}>+</button>
+                  <button 
+                    onClick={() => increaseQuantity(item)}
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
                 </div>
                 <span className={styles.itemPrice}>
                   ${((item.selectedVariant?.price || 0) * item.quantity).toFixed(2)}
@@ -161,7 +174,7 @@ const total = subtotal + tax + shipping;
           ))}
         </ul>
 
-        {/* Right column: Order Summary */}
+        {/* Order Summary */}
         <div className={styles.orderSummary}>
           <h3>Order Summary</h3>
           <div className={styles.summaryLine}>
@@ -174,22 +187,26 @@ const total = subtotal + tax + shipping;
           </div>
           <div className={styles.summaryLine}>
             <span>Shipping:</span>
-            <span>${shipping.toFixed(2)}</span>
+            <span>{shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}</span>
           </div>
+          {subtotal > 0 && subtotal < FREE_SHIPPING_THRESHOLD && (
+            <p className={styles.shippingNote}>
+              Add ${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)} more for free shipping!
+            </p>
+          )}
           <div className={styles.summaryTotal}>
             <span>Total:</span>
             <span>${total.toFixed(2)}</span>
           </div>
           <button
             className={styles.checkoutBtn}
-            onClick={() => navigate(`/checkout`)}
+            onClick={() => navigate('/checkout')}
           >
             Proceed to Checkout
           </button>
-
-            <button
-            className={styles.checkoutBtn}
-            onClick={() => navigate(`/products`)}
+          <button
+            className={styles.continueBtn}
+            onClick={() => navigate('/products')}
           >
             Continue Shopping
           </button>

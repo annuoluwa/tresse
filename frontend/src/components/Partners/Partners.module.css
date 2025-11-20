@@ -1,4 +1,3 @@
-
 .partners {
   background: var(--gradient-dark);
   color: white;
@@ -18,11 +17,12 @@
   background: var(--gradient-soft);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .partnersCaption p {
   font-size: 1.2rem;
-  color:  #4e6fa8;
+  color: #4e6fa8;
   margin-bottom: 2rem;
 }
 
@@ -34,7 +34,7 @@
 }
 
 .partnerBtn {
-  background:  #133848;
+  background: #133848;
   border: 2px solid var(--accent-rose);
   color: var(--accent-rose);
   padding: 0.7rem 1.5rem;
@@ -52,25 +52,24 @@
 }
 
 .joinContainer {
-    margin-top: 6rem;
-    padding: 3rem 6rem;
-    border: black ;
-    border-radius: 2rem;
-    background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
-    
+  margin-top: 6rem;
+  padding: 3rem 6rem;
+  border: black;
+  border-radius: 2rem;
+  background: linear-gradient(90deg, #FBC2EB, #6f9ae6);
 }
 
 .joinCaption {
-    font-size: larger;
-    line-height: 3rem;
-    color: black;
+  font-size: larger;
+  line-height: 3rem;
+  color: black;
 }
 
 input {
-    padding: 1rem;
-    border-radius: 1rem;
-    width: 14rem;
-    border: none;
+  padding: 1rem;
+  border-radius: 1rem;
+  width: 14rem;
+  border: none;
 }
 
 form p {
@@ -79,8 +78,120 @@ form p {
 }
 
 .subBtn {
+  padding: 0.7rem;
+  border-radius: 2rem;
+  border: none;
+  width: 9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.subBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .partners {
+    padding: 3rem 1.5rem;
+  }
+
+  .partnersCaption h2 {
+    font-size: 2rem;
+    line-height: 1.3;
+  }
+
+  .partnersCaption p {
+    font-size: 1rem;
+    padding: 0 1rem;
+    line-height: 1.6;
+  }
+
+  .partnersBtns {
+    gap: 0.8rem;
+    padding: 0 1rem;
+  }
+
+  .partnerBtn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .joinContainer {
+    margin-top: 4rem;
+    padding: 2rem 2rem;
+    border-radius: 1.5rem;
+  }
+
+  .joinCaption {
+    font-size: 1rem;
+    line-height: 2rem;
+    padding: 0 0.5rem;
+  }
+
+  input {
+    width: 100%;
+    max-width: 280px;
+    padding: 0.8rem;
+    font-size: 0.95rem;
+  }
+
+  .subBtn {
+    width: 100%;
+    max-width: 200px;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+  }
+
+  form p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .partners {
+    padding: 2rem 1rem;
+  }
+
+  .partnersCaption h2 {
+    font-size: 1.6rem;
+  }
+
+  .partnersCaption p {
+    font-size: 0.9rem;
+    padding: 0 0.5rem;
+  }
+
+  .partnersBtns {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .partnerBtn {
+    width: 100%;
+    max-width: 250px;
+    padding: 0.7rem 1rem;
+  }
+
+  .joinContainer {
+    margin-top: 3rem;
+    padding: 1.5rem 1rem;
+    border-radius: 1rem;
+  }
+
+  .joinCaption {
+    font-size: 0.95rem;
+    line-height: 1.8rem;
+  }
+
+  input {
+    width: 100%;
     padding: 0.7rem;
-    border-radius: 2rem;
-    border: none;
-    width: 9rem
+  }
+
+  .subBtn {
+    width: 100%;
+    padding: 0.7rem;
+  }
 }

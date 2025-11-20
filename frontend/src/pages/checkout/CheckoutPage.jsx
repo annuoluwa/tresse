@@ -9,6 +9,7 @@ const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 const API_URL = process.env.REACT_APP_API_URL;
 const TAX_RATE = 0.1;
 
+// Checkout Form Component
 const CheckoutForm = ({
   cartItems,
   setCartItems,
@@ -30,6 +31,7 @@ const CheckoutForm = ({
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [error, setError] = useState('');
 
+  // Calculate totals whenever cart or shipping changes
   useEffect(() => {
     const subtotal = cartItems.reduce(
       (sum, item) => sum + (item.price || 0) * (item.quantity || 0), 
@@ -40,11 +42,13 @@ const CheckoutForm = ({
     setTotals({ subtotal, tax, total });
   }, [cartItems, shippingCost]);
 
+  // Validate shipping info
   const isShippingValid = () => {
     const { name, email, address, city, postalCode } = shippingInfo;
     return name && email && address && city && postalCode;
   };
 
+  // Create PaymentIntent when user clicks "Place Order"
   const handlePlaceOrder = async () => {
     if (!currentUser || cartItems.length === 0) {
       setError("Cart is empty");
@@ -81,6 +85,7 @@ const CheckoutForm = ({
     }
   };
 
+  // Process payment
   const handlePayment = async () => {
     if (!stripe || !elements) return;
     
@@ -98,6 +103,7 @@ const CheckoutForm = ({
         throw new Error(result.error.message);
       }
 
+      // Complete order on backend
       const res = await fetch(`${API_URL}/order/${currentUser.id}/complete`, {
         method: "POST",
         credentials: "include"
@@ -109,10 +115,12 @@ const CheckoutForm = ({
         throw new Error(data.error || "Failed to complete order");
       }
 
+      // Clear cart and mark order complete
       setCartItems([]);
       setOrderCompleted(true);
       setOrderSuccess({ message: "Payment successful! Redirecting..." });
 
+      // Redirect to success page
       setTimeout(() => navigate("/success"), 1500);
 
     } catch (err) {
@@ -124,6 +132,7 @@ const CheckoutForm = ({
 
   return (
     <div className={styles.checkoutPage}>
+      {/* Shipping Information */}
       <div className={styles.formColumn}>
         <h3>Shipping Information</h3>
         <input
@@ -167,6 +176,7 @@ const CheckoutForm = ({
           aria-label="Postal code"
         />
 
+        {/* Shipping Method */}
         <h3>Shipping Method</h3>
         <label>
           <input
@@ -189,6 +199,7 @@ const CheckoutForm = ({
           Express Shipping (£10)
         </label>
 
+        {/* Place Order or Payment */}
         {!clientSecret ? (
           <button
             onClick={handlePlaceOrder}
@@ -200,9 +211,7 @@ const CheckoutForm = ({
         ) : (
           <>
             <h3>Payment Details</h3>
-            <div className={styles.paymentElement}>
-              <PaymentElement />
-            </div>
+            <PaymentElement />
             <button
               onClick={handlePayment}
               disabled={loading || !stripe || !elements}
@@ -213,15 +222,18 @@ const CheckoutForm = ({
           </>
         )}
 
+        {/* Success Message */}
         {orderSuccess && (
           <p className={styles.successMsg}>
             <FaCheckCircle /> {orderSuccess.message}
           </p>
         )}
 
+        {/* Error Message */}
         {error && <p className={styles.errorMsg}>{error}</p>}
       </div>
 
+      {/* Order Summary */}
       <div className={styles.summaryColumn}>
         <h3>Order Summary</h3>
         <div className={styles.summaryLine}>
@@ -245,6 +257,7 @@ const CheckoutForm = ({
   );
 };
 
+// Checkout Page Wrapper
 const CheckoutPageWrapper = ({
   currentUser,
   cartItems,
@@ -263,6 +276,7 @@ const CheckoutPageWrapper = ({
     postalCode: "",
   });
 
+  // Fetch cart on mount
   useEffect(() => {
     if (!currentUser) {
       setLoading(false);
@@ -288,6 +302,7 @@ const CheckoutPageWrapper = ({
       }
     };
 
+    // Only fetch if cart is empty and order hasn't been completed
     if (cartItems.length === 0 && !orderCompleted) {
       fetchCart();
     } else {
@@ -295,49 +310,66 @@ const CheckoutPageWrapper = ({
     }
   }, [currentUser, orderCompleted, cartItems.length, setCartItems]);
 
+  // Loading state
   if (loading) {
     return (
       <div className={styles.checkoutPage}>
-        <p className={styles.loading}>Loading checkout...</p>
+        <p>Loading checkout...</p>
       </div>
     );
   }
 
+  // Not logged in
   if (!currentUser) {
     return (
       <div className={styles.checkoutPage}>
-        <p className={styles.empty}>Please log in to proceed to checkout.</p>
+        <p>Please log in to proceed to checkout.</p>
       </div>
     );
   }
 
+  // Empty cart (but not after order completion)
   if (cartItems.length === 0 && !orderCompleted) {
     return (
       <div className={styles.checkoutPage}>
-        <p className={styles.empty}>Your cart is empty.</p>
+        <p>Your cart is empty.</p>
       </div>
     );
   }
 
-  const commonProps = {
-    cartItems,
-    setCartItems,
-    shippingCost,
-    setShippingCost,
-    currentUser,
-    clientSecret,
-    setClientSecret,
-    shippingInfo,
-    setShippingInfo,
-    setOrderCompleted
-  };
-
-  return clientSecret ? (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <CheckoutForm {...commonProps} />
-    </Elements>
-  ) : (
-    <CheckoutForm {...commonProps} />
+  // Render checkout form
+  return (
+    <>
+      {!clientSecret ? (
+        <CheckoutForm
+          cartItems={cartItems}
+          setCartItems={setCartItems}
+          shippingCost={shippingCost}
+          setShippingCost={setShippingCost}
+          currentUser={currentUser}
+          clientSecret={clientSecret}
+          setClientSecret={setClientSecret}
+          shippingInfo={shippingInfo}
+          setShippingInfo={setShippingInfo}
+          setOrderCompleted={setOrderCompleted}
+        />
+      ) : (
+        <Elements stripe={stripePromise} options={{ clientSecret }}>
+          <CheckoutForm
+            cartItems={cartItems}
+            setCartItems={setCartItems}
+            shippingCost={shippingCost}
+            setShippingCost={setShippingCost}
+            currentUser={currentUser}
+            clientSecret={clientSecret}
+            setClientSecret={setClientSecret}
+            shippingInfo={shippingInfo}
+            setShippingInfo={setShippingInfo}
+            setOrderCompleted={setOrderCompleted}
+          />
+        </Elements>
+      )}
+    </>
   );
 };
 

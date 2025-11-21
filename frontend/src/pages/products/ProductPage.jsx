@@ -17,7 +17,6 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
       setError(null);
 
       try {
-        // Build URL based on filters
         const searchTerm = searchParams.get('search');
         let url = `${API_URL}/products`;
 
@@ -36,7 +35,6 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
         const data = await res.json();
         setProducts(data);
 
-        // Initialize selected variants to first variant
         const initialVariants = {};
         data.forEach((product) => {
           if (product.variants?.length > 0) {
@@ -54,12 +52,10 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
     fetchProducts();
   }, [selectedBrand, searchParams]);
 
-  // Handle variant selection change
   const handleVariantChange = (productId, variantId) => {
     setSelectedVariants((prev) => ({ ...prev, [productId]: variantId }));
   };
 
-  // Handle add to cart
   const handleAddToCart = (product) => {
     if (!product.variants?.length) return;
 
@@ -76,13 +72,11 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
     });
   };
 
-  // Truncate description helper
   const truncateText = (text, maxLength = 100) => {
     if (!text) return '';
-    return text.length > maxLength ? text.substring(0, maxLength) : text;
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
-  // Loading state
   if (loading) {
     return (
       <div className={styles.productPage}>
@@ -91,7 +85,6 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className={styles.productPage}>
@@ -100,7 +93,6 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
     );
   }
 
-  // Empty state
   if (products.length === 0) {
     return (
       <div className={styles.productPage}>
@@ -123,7 +115,6 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
 
           return (
             <div key={product.id} className={styles.card}>
-              {/* Product Image */}
               <Link to={`/products/${product.id}`}>
                 <img
                   src={product.imageUrl}
@@ -133,22 +124,19 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
                 />
               </Link>
 
-              {/* Product Name */}
               <Link to={`/products/${product.id}`} className={styles.nameLink}>
                 <h3 className={styles.name}>{product.name}</h3>
               </Link>
 
-              {/* Brand */}
               {product.brand && (
                 <p className={styles.brand}>{product.brand}</p>
               )}
 
-              {/* Product Description */}
               <p className={styles.description}>
                 {truncateText(product.description, 100)}
                 {product.description?.length > 100 && (
                   <>
-                    ...{' '}
+                    {' '}
                     <Link className={styles.read} to={`/products/${product.id}`}>
                       Read More
                     </Link>
@@ -156,7 +144,6 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
                 )}
               </p>
 
-              {/* Variant Selector */}
               {product.variants?.length > 0 && (
                 <select
                   value={selectedVariantId}
@@ -174,14 +161,12 @@ const ProductPage = ({ selectedBrand, addToCart }) => {
                 </select>
               )}
 
-              {/* Price Display */}
               {currentVariant && (
                 <p className={styles.price}>
                   £{Number(currentVariant.price).toFixed(2)}
                 </p>
               )}
 
-              {/* Add to Cart Button */}
               {product.variants?.length > 0 && (
                 <button
                   className={styles.addBtn}

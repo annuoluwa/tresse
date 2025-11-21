@@ -1,54 +1,202 @@
+:root {
+  --gradient-dark: linear-gradient(90deg, #021f2b, #133848);
+  --gradient-soft: linear-gradient(90deg, #FBC2EB, #6f9ae6);
+  --accent-rose: #ddb3b9;
+  --accent-blush: #f8b9c4;
+  --accent-silver: #c0c0c0;
+}
 
 .orderHistoryContainer {
   background: var(--gradient-dark);
   color: var(--accent-silver);
-  padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  max-width: 100%;
+  padding: 3rem 2rem;
+  min-height: calc(100vh - 200px);
+  max-width: 1200px;
+  margin: 0 auto;
   font-family: 'Poppins', sans-serif;
-  transition: all 0.3s ease-in-out;
+  position: relative;
+  z-index: 1;
 }
 
-.orderHistoryContainer h3 {
+.title {
   text-align: center;
   color: var(--accent-blush);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 2rem;
+  margin-bottom: 2rem;
   letter-spacing: 1px;
 }
 
-.orderHistory {
-  background: var(--gradient-soft);
-  border-radius: 1rem;
+.orderCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--accent-rose);
+  border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  color: #021f2b;
-  border: 1px solid var(--accent-rose);
   transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
-.orderHistory:hover {
+.orderCard:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 14px rgba(219, 179, 185, 0.4);
+  border-color: var(--accent-blush);
 }
 
-.orderHistory p {
-  margin: 0.4rem 0;
-  font-size: 1rem;
+.orderHeader {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(192, 192, 192, 0.3);
+}
+
+.orderId {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent-blush);
+  margin: 0;
+}
+
+.orderDate {
+  font-size: 0.9rem;
+  color: var(--accent-silver);
+  margin: 0;
+}
+
+.orderDetails {
+  margin-bottom: 1rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: white;
+}
+
+.total {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent-blush);
+}
+
+.statusPaid {
+  color: #4caf50;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.statusPending {
+  color: #ff9800;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.orderItems {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(192, 192, 192, 0.3);
+}
+
+.orderItems h4 {
+  color: var(--accent-blush);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.orderItems ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.orderItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  color: var(--accent-silver);
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(192, 192, 192, 0.1);
+}
+
+.orderItem:last-child {
+  border-bottom: none;
+}
+
+.loading,
+.empty,
+.error {
+  text-align: center;
+  padding: 4rem 2rem;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  min-height: 300px;
+}
+
+.loading {
+  color: var(--accent-blush);
+  font-style: italic;
+}
+
+.empty {
+  color: var(--accent-silver);
+  font-size: 1.3rem;
+}
+
+.error {
+  color: #ff5252;
   font-weight: 500;
 }
 
-.orderHistory p span {
-  color: var(--accent-rose);
-  font-weight: 600;
+@media (max-width: 768px) {
+  .orderHistoryContainer {
+    padding: 2rem 1rem;
+    min-height: calc(100vh - 150px);
+  }
+
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .orderCard {
+    padding: 1rem;
+  }
+
+  .orderHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .detailRow {
+    font-size: 0.9rem;
+  }
+
+  .total {
+    font-size: 1.1rem;
+  }
 }
 
-/* loading and empty states */
-.loading,
-.empty {
-  text-align: center;
-  color: var(--accent-blush);
-  font-style: italic;
-  margin-top: 2rem;
+@media (max-width: 480px) {
+  .orderHistoryContainer {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .orderCard {
+    padding: 0.8rem;
+  }
+
+  .orderItem {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
 }

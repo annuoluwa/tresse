@@ -100,85 +100,89 @@ const CheckoutForm = ({
 
   return (
     <div className={styles.checkoutPage}>
-      <div className={styles.formColumn}>
-        <h3>Shipping Information</h3>
-        <input type="text" placeholder="Full Name" value={shippingInfo.name} onChange={e => setShippingInfo({ ...shippingInfo, name: e.target.value })} required />
-        <input type="email" placeholder="Email" value={shippingInfo.email} onChange={e => setShippingInfo({ ...shippingInfo, email: e.target.value })} required />
-        <input type="text" placeholder="Address" value={shippingInfo.address} onChange={e => setShippingInfo({ ...shippingInfo, address: e.target.value })} required />
-        <input type="text" placeholder="City" value={shippingInfo.city} onChange={e => setShippingInfo({ ...shippingInfo, city: e.target.value })} required />
-        <input type="text" placeholder="Postal Code" value={shippingInfo.postalCode} onChange={e => setShippingInfo({ ...shippingInfo, postalCode: e.target.value })} required />
+      <div className={styles.checkoutContent}>
+        <div className={styles.formColumn}>
+          <h3>Shipping Information</h3>
+          <input type="text" placeholder="Full Name" value={shippingInfo.name} onChange={e => setShippingInfo({ ...shippingInfo, name: e.target.value })} required />
+          <input type="email" placeholder="Email" value={shippingInfo.email} onChange={e => setShippingInfo({ ...shippingInfo, email: e.target.value })} required />
+          <input type="text" placeholder="Address" value={shippingInfo.address} onChange={e => setShippingInfo({ ...shippingInfo, address: e.target.value })} required />
+          <input type="text" placeholder="City" value={shippingInfo.city} onChange={e => setShippingInfo({ ...shippingInfo, city: e.target.value })} required />
+          <input type="text" placeholder="Postal Code" value={shippingInfo.postalCode} onChange={e => setShippingInfo({ ...shippingInfo, postalCode: e.target.value })} required />
 
-        <h3>Shipping Method</h3>
-        <label>
-          <input type="radio" name="shipping" value={5} checked={shippingCost === 5} onChange={e => setShippingCost(Number(e.target.value))} />
-          Standard (£5)
-        </label>
-        <label>
-          <input type="radio" name="shipping" value={10} checked={shippingCost === 10} onChange={e => setShippingCost(Number(e.target.value))} />
-          Express (£10)
-        </label>
-
-        {!clientSecret ? (
-          <button onClick={handlePlaceOrder} disabled={loading} className={styles.placeOrderBtn}>
-            {loading ? "Processing..." : "Place Order"}
-          </button>
-        ) : (
-          <>
-            <h3>Payment Details</h3>
-            <div className={styles.paymentElementWrapper}>
-              <PaymentElement />
-            </div>
-            <button 
-              onClick={handlePayment} 
-              disabled={loading}
-              className={styles.payNowBtn}
-            >
-              {loading ? "Processing Payment..." : "Pay Now"}
-            </button>
-          </>
-        )}
-
-        {orderSuccess && (
-          <p className={styles.successMsg}>
-            <FaCheckCircle /> {orderSuccess.message}
-          </p>
-        )}
-
-        {error && <p className={styles.errorMsg}>{error}</p>}
-      </div>
-
-      <div className={styles.summaryColumn}>
-        <h3>Order Summary</h3>
-        {cartItems.length > 0 && (
-          <div className={styles.cartItems}>
-            {cartItems.map((item, index) => (
-              <div key={index} className={styles.cartItem}>
-                <span className={styles.itemName}>
-                  {item.name} {item.selectedVariant && `(${item.selectedVariant.variant_value})`}
-                </span>
-                <span className={styles.itemQuantity}>x{item.quantity}</span>
-                <span className={styles.itemPrice}>
-                  £{((item.selectedVariant?.price || item.price) * item.quantity).toFixed(2)}
-                </span>
-              </div>
-            ))}
+          <h3>Shipping Method</h3>
+          <div className={styles.shippingOptions}>
+            <label>
+              <input type="radio" name="shipping" value={5} checked={shippingCost === 5} onChange={e => setShippingCost(Number(e.target.value))} />
+              Standard (£5)
+            </label>
+            <label>
+              <input type="radio" name="shipping" value={10} checked={shippingCost === 10} onChange={e => setShippingCost(Number(e.target.value))} />
+              Express (£10)
+            </label>
           </div>
-        )}
-        <div className={styles.summaryLine}>
-          <span>Subtotal:</span>
-          <span>£{totals.subtotal.toFixed(2)}</span>
+
+          {!clientSecret ? (
+            <button onClick={handlePlaceOrder} disabled={loading} className={styles.placeOrderBtn}>
+              {loading ? "Processing..." : "Place Order"}
+            </button>
+          ) : (
+            <>
+              <h3>Payment Details</h3>
+              <div className={styles.paymentElementWrapper}>
+                <PaymentElement />
+              </div>
+              <button 
+                onClick={handlePayment} 
+                disabled={loading}
+                className={styles.placeOrderBtn}
+              >
+                {loading ? "Processing Payment..." : "Pay Now"}
+              </button>
+            </>
+          )}
+
+          {orderSuccess && (
+            <p className={styles.successMsg}>
+              <FaCheckCircle /> {orderSuccess.message}
+            </p>
+          )}
+
+          {error && <p className={styles.errorMsg}>{error}</p>}
         </div>
-        <div className={styles.summaryLine}>
-          <span>Tax (10%):</span>
-          <span>£{totals.tax.toFixed(2)}</span>
-        </div>
-        <div className={styles.summaryLine}>
-          <span>Shipping:</span>
-          <span>£{shippingCost.toFixed(2)}</span>
-        </div>
-        <div className={styles.summaryTotal}>
-          <span>Total:</span>
-          <span>£{totals.total.toFixed(2)}</span>
+
+        <div className={styles.summaryColumn}>
+          <h3>Order Summary</h3>
+          {cartItems.length > 0 && (
+            <div className={styles.cartItems}>
+              {cartItems.map((item, index) => (
+                <div key={index} className={styles.cartItem}>
+                  <span className={styles.itemName}>
+                    {item.name} {item.selectedVariant && `(${item.selectedVariant.variant_value})`}
+                  </span>
+                  <span className={styles.itemQuantity}>x{item.quantity}</span>
+                  <span className={styles.itemPrice}>
+                    £{((item.selectedVariant?.price || item.price) * item.quantity).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className={styles.summaryLine}>
+            <span>Subtotal:</span>
+            <span>£{totals.subtotal.toFixed(2)}</span>
+          </div>
+          <div className={styles.summaryLine}>
+            <span>Tax (10%):</span>
+            <span>£{totals.tax.toFixed(2)}</span>
+          </div>
+          <div className={styles.summaryLine}>
+            <span>Shipping:</span>
+            <span>£{shippingCost.toFixed(2)}</span>
+          </div>
+          <div className={styles.summaryTotal}>
+            <span>Total:</span>
+            <span>£{totals.total.toFixed(2)}</span>
+          </div>
         </div>
       </div>
     </div>

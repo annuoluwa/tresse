@@ -22,13 +22,13 @@ function SuccessPage() {
       
       <div className={styles.buttonGroup}>
         <button 
-          className={styles.primaryButton} 
+          className={styles.actionButton} 
           onClick={() => navigate("/order-history")}
         >
           View Order History
         </button>
         <button 
-          className={styles.secondaryButton} 
+          className={styles.actionButton} 
           onClick={() => navigate("/")}
         >
           Continue Shopping

@@ -25,6 +25,7 @@ function OrderHistoryPage({ currentUser }) {
         }
 
         const data = await response.json();
+        console.log("Order history response:", data);
         setOrderHistory(data);
       } catch (err) {
         setError(err.message || "Failed to load orders");

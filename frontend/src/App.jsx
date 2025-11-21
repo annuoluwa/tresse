@@ -208,7 +208,7 @@ useEffect(() => {
           <Route path="/products/:id" element={<ProductDetails addToCart={addToCart} />} />
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/profile" element={<UserProfilePage currentUser={currentUser} />} />
-          <Route path="/orders" element={<OrderHistoryPage currentUser={currentUser} />} />
+          <Route path="/order-history" element={<OrderHistoryPage currentUser={currentUser} />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/category/:name" element={<CategoryProductsPage />} />
           <Route 

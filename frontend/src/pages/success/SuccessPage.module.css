@@ -1,4 +1,4 @@
-  .successPage {
+.successPage {
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
@@ -41,4 +41,23 @@
 .icon {
     size: 80px;
     color: var(--accent-blush);
+}
+
+.actionButton {
+  background: var(--gradient-soft);
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 12px 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: inline-block;
+}
+
+.actionButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }

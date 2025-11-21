@@ -305,6 +305,15 @@ h4 {
   background-color: var(--accent-rose);
 }
 
+.searchResultImage {
+  max-width: 48px;
+  max-height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
 @media (max-width: 864px) {
   .navLinks {
     display: none;

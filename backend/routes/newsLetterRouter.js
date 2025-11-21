@@ -1,15 +1,20 @@
 const express = require("express");
 const pool = require('../db');
+const { body, validationResult } = require('express-validator');
 const newsletterRouter = express.Router();
 
+// Validator middleware
+const newsletterValidator = [
+  body('email').isEmail().normalizeEmail()
+];
+
 async function Newsletter(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { email } = req.body;
-
-    // Validate email
-    if (!email || !email.includes('@')) {
-      return res.status(400).json({ error: "Valid email is required" });
-    }
 
     // Check if already subscribed
     const existing = await pool.query(
@@ -37,11 +42,12 @@ async function Newsletter(req, res, next) {
 }
 
 // Routes
-newsletterRouter.post("/subscribe", Newsletter);
+newsletterRouter.post("/subscribe", newsletterValidator, Newsletter);
 
 // Exports
 module.exports = {
   newsletterRouter,
-  Newsletter
+  Newsletter,
+  newsletterValidator
 };
 

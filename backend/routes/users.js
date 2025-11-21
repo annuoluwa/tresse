@@ -7,6 +7,23 @@ const passport = require('passport');
 const { passwordHash } = require('../passport');
 const isLoggedIn = require('../middleware/isLoggedIn');
 const isAdmin = require('../middleware/admin');
+const { body, validationResult } = require('express-validator');
+
+// ====== VALIDATORS ======
+const registerValidator = [
+  body('username').trim().escape().isLength({ min: 2, max: 32 }),
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 6 }),
+  body('is_admin').optional().isBoolean()
+];
+
+const updateUserValidator = [
+  body('username').optional().trim().escape().isLength({ min: 2, max: 32 }),
+  body('email').optional().isEmail().normalizeEmail(),
+  body('password').optional().isLength({ min: 6 })
+];
+
+// ====== HANDLERS ======
 
 // LOGIN - Browser login (sets cookies)
 async function userBrowserLogin(req, res, next) {
@@ -36,15 +53,12 @@ function userLogout(req, res, next) {
 
 // REGISTER
 async function registerNewUser(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { username, email, password, is_admin } = req.body;
-
-    // Validation
-    if (!username || !email || !password) {
-      return res.status(400).json({ 
-        error: "Username, email, and password are required" 
-      });
-    }
 
     // Check if user exists
     const existingUser = await Users.findByEmail(email);
@@ -62,9 +76,9 @@ async function registerNewUser(req, res, next) {
     const adminFlag = is_admin === true || is_admin === 'true';
     const newUser = await Users.createUser(username, email, hashedPassword, adminFlag);
 
-    res.status(201).json({ 
-      message: "User registered successfully", 
-      user: newUser 
+    res.status(201).json({
+      message: "User registered successfully",
+      user: newUser
     });
   } catch (err) {
     next(err);
@@ -114,6 +128,10 @@ async function getUserById(req, res, next) {
 
 // Update user by ID
 async function updateUserRoute(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const userId = parseInt(req.params.id, 10);
     const { username, email, password } = req.body;
@@ -127,20 +145,20 @@ async function updateUserRoute(req, res, next) {
     const values = [];
     let idx = 1;
 
-    if (username) { 
-      fields.push(`username = $${idx++}`); 
-      values.push(username); 
+    if (username) {
+      fields.push(`username = $${idx++}`);
+      values.push(username);
     }
-    if (email) { 
-      fields.push(`email = $${idx++}`); 
-      values.push(email); 
+    if (email) {
+      fields.push(`email = $${idx++}`);
+      values.push(email);
     }
     if (password) {
       const hashedPassword = await passwordHash(password, 10);
       if (!hashedPassword) {
         return res.status(500).json({ error: 'Password hashing failed' });
       }
-      fields.push(`password = $${idx++}`); 
+      fields.push(`password = $${idx++}`);
       values.push(hashedPassword);
     }
 
@@ -156,9 +174,9 @@ async function updateUserRoute(req, res, next) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json({ 
-      message: "User updated successfully", 
-      user: result.rows[0] 
+    res.json({
+      message: "User updated successfully",
+      user: result.rows[0]
     });
   } catch (err) {
     next(err);
@@ -186,23 +204,25 @@ async function deleteUserPath(req, res, next) {
   }
 }
 
-// ROUTES
+// ====== ROUTES ======
 usersRouter.post('/login', userBrowserLogin);
 usersRouter.post('/logout', userLogout);
-usersRouter.post('/register', registerNewUser);
+usersRouter.post('/register', registerValidator, registerNewUser);
 usersRouter.get('/', isLoggedIn, isAdmin, getAllProfilesByAdmin);
 usersRouter.get('/:id', getUserById);
-usersRouter.put('/:id', isLoggedIn, updateUserRoute);
+usersRouter.put('/:id', isLoggedIn, updateUserValidator, updateUserRoute);
 usersRouter.delete('/:id', isLoggedIn, isAdmin, deleteUserPath);
 
-// EXPORTS
+// ====== EXPORTS ======
 module.exports = {
   usersRouter,
   userBrowserLogin,
   userLogout,
+  registerValidator,
   registerNewUser,
   getAllProfilesByAdmin,
   getUserById,
+  updateUserValidator,
   updateUserRoute,
   deleteUserPath
 };

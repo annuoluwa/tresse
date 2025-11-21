@@ -4,6 +4,19 @@ const pool = require('../db');
 const Stripe = require('stripe');
 const isLoggedIn = require('../middleware/isLoggedIn');
 const stripe = Stripe(process.env.STRIPE_SK);
+const { body, validationResult } = require('express-validator');
+
+// ====== VALIDATORS ======
+const checkoutValidator = [
+  body('shippingCost').optional().isNumeric().toInt(),
+  body('shippingInfo.name').optional().trim().escape().isLength({ min: 2, max: 64 }),
+  body('shippingInfo.email').optional().isEmail().normalizeEmail(),
+  body('shippingInfo.address').optional().trim().escape().isLength({ min: 4, max: 128 }),
+  body('shippingInfo.city').optional().trim().escape().isLength({ min: 2, max: 64 }),
+  body('shippingInfo.postalCode').optional().trim().escape().isLength({ min: 2, max: 16 })
+];
+
+// ====== HANDLERS ======
 
 // ADD TO CART
 async function addToCart(req, res, next) {
@@ -115,6 +128,11 @@ async function deleteCartbyUsersId(req, res, next) {
 
 // CHECKOUT
 async function checkout(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const userId = parseInt(req.params.userId, 10);
   const { shippingCost = 5 } = req.body;
 
@@ -174,19 +192,20 @@ async function checkout(req, res, next) {
   }
 }
 
-// ROUTES
+// ====== ROUTES ======
 cartRouter.post("/:userId", addToCart);
 cartRouter.get("/:userId", usersItemsInCartById);
 cartRouter.delete("/:userId", deleteCartbyUsersId);
 cartRouter.put("/:userId/:productId/:variantId", updateQuantity);
-cartRouter.post("/:userId/checkout", checkout);
+cartRouter.post("/:userId/checkout", checkoutValidator, checkout);
 
-// EXPORT
+// ====== EXPORTS ======
 module.exports = {
   cartRouter,
   addToCart,
   usersItemsInCartById,
   deleteCartbyUsersId,
   updateQuantity,
+  checkoutValidator,
   checkout
 };

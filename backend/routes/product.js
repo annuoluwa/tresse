@@ -3,22 +3,36 @@ const productRouter = express.Router();
 const pool = require('../db');
 const isAdmin = require('../middleware/admin');
 const { categoryHelper } = require('./category');
+const { body, param, query, validationResult } = require('express-validator');
+
+// ====== VALIDATORS ======
+const productValidator = [
+  body('name').trim().escape().isLength({ min: 2, max: 128 }),
+  body('description').trim().escape().isLength({ min: 4, max: 1024 }),
+  body('category').trim().escape().isLength({ min: 2, max: 64 }),
+  body('brand').trim().escape().isLength({ min: 2, max: 64 }),
+  body('main_page_url').optional().trim().escape().isLength({ max: 256 })
+];
+
+const productIdValidator = [
+  param('id').isInt({ min: 1 }).toInt()
+];
+
+const searchValidator = [
+  query('term').trim().escape().isLength({ min: 1, max: 128 })
+];
 
 // Router param middleware for product ID
 productRouter.param('id', async (req, res, next, id) => {
   try {
     const productId = parseInt(id, 10);
-    
     if (isNaN(productId)) {
       return res.status(400).json({ error: "Invalid product ID" });
     }
-
     const result = await pool.query("SELECT * FROM products WHERE id = $1", [productId]);
-    
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-    
     req.product = result.rows[0];
     next();
   } catch (err) {
@@ -53,7 +67,6 @@ async function getAllProducts(req, res, next) {
       GROUP BY p.id
       ORDER BY p.id ASC
     `);
-
     res.status(200).json(result.rows);
   } catch (err) {
     next(err);
@@ -64,25 +77,20 @@ async function getAllProducts(req, res, next) {
 async function getProductsById(req, res, next) {
   try {
     const productId = parseInt(req.params.id, 10);
-
     if (isNaN(productId)) {
       return res.status(400).json({ error: "Invalid product ID" });
     }
-
     const product = await pool.query(
       'SELECT * FROM products WHERE id = $1',
       [productId]
     );
-
     if (product.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-
     const variants = await pool.query(
       "SELECT * FROM variants WHERE product_id = $1",
       [productId]
     );
-
     res.status(200).json({ 
       ...product.rows[0], 
       variants: variants.rows 
@@ -96,7 +104,6 @@ async function getProductsById(req, res, next) {
 async function getProductByCategory(req, res, next) {
   try {
     const categoryName = decodeURIComponent(req.params.name);
-
     const products = await pool.query(
       `SELECT p.*, c.name AS category_name
        FROM products p
@@ -104,11 +111,9 @@ async function getProductByCategory(req, res, next) {
        WHERE LOWER(c.name) = LOWER($1)`,
       [categoryName]
     );
-
     if (products.rows.length === 0) {
       return res.status(404).json({ message: "No products found in this category" });
     }
-
     res.status(200).json(products.rows);
   } catch (err) {
     next(err);
@@ -119,7 +124,6 @@ async function getProductByCategory(req, res, next) {
 async function getBrands(req, res, next) {
   try {
     const brandName = decodeURIComponent(req.params.name);
-
     const result = await pool.query(
       `SELECT 
         p.id,
@@ -146,11 +150,9 @@ async function getBrands(req, res, next) {
       ORDER BY p.id`,
       [brandName]
     );
-
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "No products found for this brand" });
     }
-
     res.status(200).json(result.rows);
   } catch (err) {
     next(err);
@@ -159,13 +161,15 @@ async function getBrands(req, res, next) {
 
 // Search products by name
 async function searchProducts(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { term } = req.query;
-
     if (!term) {
       return res.status(400).json({ error: 'Search term required' });
     }
-
     const result = await pool.query(
       `SELECT 
         p.id,
@@ -177,7 +181,6 @@ async function searchProducts(req, res, next) {
        WHERE p.name ILIKE $1 OR p.description ILIKE $1 OR p.brand ILIKE $1`,
       [`%${term}%`]
     );
-
     res.json(result.rows);
   } catch (err) {
     next(err);
@@ -186,27 +189,24 @@ async function searchProducts(req, res, next) {
 
 // POST - Add new product (admin only)
 async function addProduct(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { name, description, category, brand, main_page_url } = req.body;
-
-    // Validation
     if (!name || !description || !category || !brand) {
       return res.status(400).json({ 
         error: "name, description, category, and brand are required" 
       });
     }
-
-    // Get or create category
     const categoryId = await categoryHelper(category);
-
-    // Insert product
     const result = await pool.query(
       `INSERT INTO products (name, description, category_id, brand, main_page_url) 
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
       [name, description, categoryId, brand, main_page_url]
     );
-
     res.status(201).json(result.rows[0]);
   } catch (err) {
     next(err);
@@ -215,44 +215,37 @@ async function addProduct(req, res, next) {
 
 // PUT - Update product by ID
 async function updateProduct(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const id = parseInt(req.params.id, 10);
     const { name, description, category, brand, main_page_url } = req.body;
-
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid product ID" });
     }
-
-    // Get category ID if provided
     let categoryId;
     if (category) {
       categoryId = await categoryHelper(category);
     }
-
-    // Build dynamic update query
     const fields = [];
     const values = [];
     let idx = 1;
-
     if (name) { fields.push(`name = $${idx++}`); values.push(name); }
     if (description) { fields.push(`description = $${idx++}`); values.push(description); }
     if (categoryId) { fields.push(`category_id = $${idx++}`); values.push(categoryId); }
     if (brand) { fields.push(`brand = $${idx++}`); values.push(brand); }
     if (main_page_url) { fields.push(`main_page_url = $${idx++}`); values.push(main_page_url); }
-
     if (fields.length === 0) {
       return res.status(400).json({ error: "No fields provided to update" });
     }
-
     values.push(id);
     const query = `UPDATE products SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
-
     const result = await pool.query(query, values);
-
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-
     res.json(result.rows[0]);
   } catch (err) {
     next(err);
@@ -263,17 +256,13 @@ async function updateProduct(req, res, next) {
 async function deleteProduct(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
-
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid product ID" });
     }
-
     const result = await pool.query("DELETE FROM products WHERE id = $1", [id]);
-
     if (result.rowCount === 0) {
       return res.status(404).json({ message: "Product not found" });
     }
-
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -281,14 +270,14 @@ async function deleteProduct(req, res, next) {
 }
 
 // Routes (order matters - specific before dynamic)
-productRouter.get('/search', searchProducts);
+productRouter.get('/search', searchValidator, searchProducts);
 productRouter.get('/category/:name', getProductByCategory);
 productRouter.get('/brand/:name', getBrands);
 productRouter.get('/', getAllProducts);
-productRouter.get('/:id', getProductsById);
-productRouter.post('/', isAdmin, addProduct);
-productRouter.put('/:id', isAdmin, updateProduct);
-productRouter.delete('/:id', isAdmin, deleteProduct);
+productRouter.get('/:id', productIdValidator, getProductsById);
+productRouter.post('/', isAdmin, productValidator, addProduct);
+productRouter.put('/:id', isAdmin, [...productIdValidator, ...productValidator], updateProduct);
+productRouter.delete('/:id', isAdmin, productIdValidator, deleteProduct);
 
 // Exports
 module.exports = {

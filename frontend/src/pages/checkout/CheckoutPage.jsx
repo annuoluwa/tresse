@@ -126,16 +126,11 @@ const CheckoutForm = ({
           <>
             <h3>Payment Details</h3>
             <div className={styles.paymentElementWrapper}>
-              {/* Only render PaymentElement if stripe and elements are ready */}
-              {stripe && elements ? (
-                <PaymentElement />
-              ) : (
-                <p className={styles.loadingPayment}>Loading payment form...</p>
-              )}
+              <PaymentElement />
             </div>
             <button 
               onClick={handlePayment} 
-              disabled={loading || !stripe || !elements}
+              disabled={loading}
               className={styles.payNowBtn}
             >
               {loading ? "Processing Payment..." : "Pay Now"}

@@ -104,7 +104,7 @@ npm test
 - Sensitive backend files like passport.js should remain private and not exposed publicly.
 - Backend uses session-based authentication with secure SESSION_SECRET.
 
-## 7. ## Live Demo
+## 7. Live Demo
   
 - Check out the live app here: [Tresse App](https://tresse.onrender.com)
 
@@ -137,4 +137,5 @@ npm test
 **For questions or collaboration, contact:**
 
 leezabethyomi@gmail.com
+
 

@@ -104,12 +104,12 @@ npm test
 - Sensitive backend files like passport.js should remain private and not exposed publicly.
 - Backend uses session-based authentication with secure SESSION_SECRET.
 
-  ## 7. ## Live Demo
+## 7. ## Live Demo
   
 - Check out the live app here: [Tresse App](https://tresse.onrender.com)
 
 
-## 7. Future Plans
+## 8. Future Plans
 **Planned enhancements for Tresse:**
 
 - Expand product catalog to include skincare, makeup, and wellness.
@@ -118,7 +118,7 @@ npm test
 - Enhance premium UI experience across all pages.
 - Improve payment and order tracking system.
 
-## 8. Contributing
+## 9. Contributing
 **Steps to contribute to this project:**
 
 1. Fork the repository.
@@ -130,10 +130,11 @@ npm test
    git push origin feature-name
 5. Open a Pull Request
 
-## 9. License
+## 10. License
 **This project is licensed under the MIT License.**
 
-## 10. Contact
+## 11. Contact
 **For questions or collaboration, contact:**
 
 leezabethyomi@gmail.com
+
